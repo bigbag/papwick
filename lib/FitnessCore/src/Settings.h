@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Device.h>
-
 #include <cstdint>
 
 namespace fit {
@@ -23,27 +21,12 @@ struct Settings {
   uint8_t exercises = 0;
 };
 
-// The saved settings before the device settings moved to the platform.
-struct SettingsV3 {
-  uint8_t version = 3;
-  uint8_t sleep = 2;
-  Units units = Units::Metric;
-  uint8_t volume = 2;
-  bool vibration = true;
-  uint8_t brightness = 2;
-  uint8_t workTime = 1;
-  uint8_t restTime = 1;
-  uint8_t exercises = 0;
-};
-
 struct Range {
   float min, max, step;
   int decimals;
 };
 
 bool isValid(const Settings& s);
-// Splits valid version 3 settings into the fitness and the device settings. Returns false for invalid ones.
-bool migrate(const SettingsV3& old, Settings& out, sys::Device& device);
 
 // The ranges stay inside the limits of isValid(Profile) after conversion to kg and cm.
 Range weightRange(Units u);

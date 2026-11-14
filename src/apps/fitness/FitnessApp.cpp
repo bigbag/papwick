@@ -42,20 +42,6 @@ void store(const char* key, const T& value) {
   if (prefs.putBytes(key, &value, sizeof(value)) != sizeof(value)) LOG_ERR(TAG, "Save '%s' failed", key);
 }
 
-// Version 3 kept the device settings in the fitness settings. Move them to the platform once.
-void migrateSettings() {
-  fit::SettingsV3 old;
-  if (!prefs.isKey("settings") || prefs.getBytes("settings", &old, sizeof(old)) != sizeof(old)) return;
-  if (!fit::migrate(old, app::settings, shell::device())) {
-    LOG_WRN(TAG, "Invalid version 3 settings, use defaults");
-    return;
-  }
-  // The device settings go first: the version 3 record is their only copy until then.
-  if (!shell::saveDevice()) return;
-  app::saveSettings();
-  LOG_INF(TAG, "Settings moved from version 3");
-}
-
 Screen& screenFor(ScreenId id) {
   switch (id) {
     case ScreenId::Home:
@@ -84,7 +70,7 @@ class Fitness : public App {
 
   void boot() override {
     if (!prefs.begin(info().id, false)) LOG_ERR(TAG, "NVS open failed");
-    if (!load("settings", app::settings)) migrateSettings();
+    load("settings", app::settings);
     hasProfile = load("profile", app::profile);
     load("progress", app::progress);
     load("weights", app::weights);

@@ -129,6 +129,7 @@ class Settings : public App {
         ui::clear();
         ui::Row rows[ui::kMaxRows];
         const int n = appRows(rows);
+        snprintf(entries_, sizeof(entries_), tr(FMT_ENTRIES), usedEntries(appAt(app_).info().id));
         ui::rowsDraw(appAt(app_).info().name, rows, n);
         ui::hints(ui::kHintsY, tr(BACK), nullptr);
         break;
@@ -299,7 +300,6 @@ class Settings : public App {
     const ui::Row* own = a.settings(n);
     n = std::min(n, ui::kMaxRows - 2);
     for (int i = 0; i < n; ++i) rows[i] = own[i];
-    snprintf(entries_, sizeof(entries_), tr(FMT_ENTRIES), usedEntries(a.info().id));
     rows[n] = {tr(CLEAR_DATA), nullptr, 0, nullptr, ">"};
     rows[n + 1] = {tr(STORAGE), nullptr, 0, nullptr, entries_};
     return n + 2;

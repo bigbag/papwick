@@ -11,7 +11,7 @@ struct AppInfo {
   const char* id;
   const char* name;
   uint16_t color;
-  // Draws the app pictogram on the home screen. The home screen and Settings have none.
+  // Draws the app pictogram on the home screen. The home screen itself has none.
   icon::Draw icon;
 };
 

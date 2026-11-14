@@ -196,27 +196,6 @@ void testSettings(TestUtils::TestRunner& r) {
   s.version = kSettingsVersion - 1;
   r.expectTrue(!isValid(s), "an old settings version is invalid");
 
-  SettingsV3 old;
-  old.sleep = 4;
-  old.units = Units::Imperial;
-  old.volume = 0;
-  old.vibration = false;
-  old.brightness = 3;
-  old.workTime = 2;
-  old.restTime = 0;
-  old.exercises = 3;
-  sys::Device d;
-  d.zone = 3;
-  r.expectTrue(migrate(old, s, d) && isValid(s) && sys::isValid(d), "version 3 settings migrate");
-  r.expectTrue(s.workTime == 2 && s.restTime == 0 && s.exercises == 3, "migration keeps the workout settings");
-  r.expectTrue(d.sleep == 4 && d.units == 1 && d.volume == 0 && !d.vibration && d.brightness == 3 && d.zone == 3,
-               "migration moves the device settings and keeps the others");
-  old.sleep = 5;
-  s = Settings{};
-  d = sys::Device{};
-  r.expectTrue(!migrate(old, s, d) && s.workTime == 1 && d.sleep == 2, "invalid version 3 settings change nothing");
-  r.expectTrue(sizeof(SettingsV3) == 9, "version 3 layout is 9 bytes as saved");
-
   bool lbOk = true;
   const Range wr = weightRange(Units::Imperial);
   for (float lb = wr.min; lb <= wr.max; lb += wr.step) {

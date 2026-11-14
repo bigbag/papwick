@@ -3,6 +3,7 @@
 #include <I18n.h>
 #include <Logging.h>
 
+#include <algorithm>
 #include <cstdio>
 
 #include "App.h"
@@ -72,7 +73,7 @@ class Connect4App : public App {
     }
     if (in.tap && board_.turn == connect4::kPlayer &&
         ui::Rect{left(), kTop - kCell, kWidth, kHeight + kCell}.hit(in.x, in.y)) {
-      play((in.x - left()) / kCell);
+      play(std::min((in.x - left()) / kCell, connect4::kCols - 1));
     }
   }
 

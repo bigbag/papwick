@@ -11,20 +11,7 @@ namespace {
 
 constexpr const char* TAG = "ONBOARD";
 
-enum Step : uint8_t {
-  Welcome,
-  Safety,
-  UnitsStep,
-  SexStep,
-  Age,
-  Height,
-  Weight,
-  Target,
-  PushUps,
-  LowImpact,
-  Result,
-  kStepCount
-};
+enum Step : uint8_t { Welcome, Safety, SexStep, Age, Height, Weight, Target, PushUps, LowImpact, Result, kStepCount };
 
 ui::Rect choiceRect(int i, int n) {
   const int h = 62, gap = 18;
@@ -63,14 +50,6 @@ class Onboarding : public Screen {
       case Welcome:
       case Safety:
         if (in.green) next();
-        break;
-      case UnitsStep:
-        if (chosen >= 0) {
-          shell::device().units = static_cast<uint8_t>(chosen);
-          shell::saveDevice();
-          setupPickers();
-          next();
-        }
         break;
       case SexStep:
         if (chosen >= 0) {
@@ -120,9 +99,6 @@ class Onboarding : public Screen {
         ui::text("shortness of breath.", ui::cx(), 306, &fonts::DejaVu18);
         ui::hints(ui::kHintsY, "back", "I understand");
         break;
-      case UnitsStep:
-        drawChoices("Units", {"Metric: kg, cm", "Imperial: lb, in"});
-        break;
       case SexStep:
         drawChoices("Your sex", {"Male", "Female"});
         break;
@@ -151,7 +127,6 @@ class Onboarding : public Screen {
 
   int choiceCount() const {
     switch (step_) {
-      case UnitsStep:
       case SexStep:
       case LowImpact:
         return 2;

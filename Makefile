@@ -9,7 +9,7 @@ ifneq ($(wildcard $(CURDIR)/.venv/bin/pio),)
 export PATH := $(CURDIR)/.venv/bin:$(PATH)
 endif
 
-ENV ?= fitness
+ENV ?= papwick
 PORT ?= /dev/ttyACM0
 LOG ?= device.log
 VERSION ?= $(shell sed -n 's/^version = //p' platformio.ini)
@@ -20,7 +20,7 @@ all: help
 
 ## Firmware:
 
-build: ## Build firmware (ENV=fitness|probe)
+build: ## Build firmware (ENV=papwick|probe)
 	pio run -e $(ENV)
 
 upload: ## Build and flash to device (ENV=..., PORT=...)
@@ -66,12 +66,14 @@ restore: ## Write the stock firmware backup back to the device
 ## Release:
 
 release: ## Build the release images into dist/
-	pio run -e fitness
+	@git diff --quiet HEAD || { echo "Commit the changes first."; exit 1; }
+	pio run -e papwick
 	mkdir -p dist
-	cp .pio/build/fitness/firmware.bin dist/papwick-$(VERSION).bin
-	esptool --chip esp32s3 merge-bin -o dist/papwick-$(VERSION)-full.bin --flash-mode dio --flash-freq 80m --flash-size 32MB 0x0 .pio/build/fitness/bootloader.bin 0x8000 .pio/build/fitness/partitions.bin 0xe000 $(BOOT_APP0) 0x10000 .pio/build/fitness/firmware.bin
+	cp .pio/build/papwick/firmware.bin dist/papwick-$(VERSION).bin
+	esptool --chip esp32s3 merge-bin -o dist/papwick-$(VERSION)-full.bin --flash-mode dio --flash-freq 80m --flash-size 32MB 0x0 .pio/build/papwick/bootloader.bin 0x8000 .pio/build/papwick/partitions.bin 0xe000 $(BOOT_APP0) 0x10000 .pio/build/papwick/firmware.bin
 
 tag: ## Create and push the tag v$(VERSION)
+	@git diff --quiet HEAD || { echo "Commit the changes first."; exit 1; }
 	git tag -a v$(VERSION) -m "v$(VERSION)"
 	git push origin v$(VERSION)
 
@@ -111,14 +113,13 @@ endif
 
 ## Unit Tests:
 
-test: test-build test-run ## Build and run C++ unit tests
+test: test-run ## Build and run C++ unit tests
 
 test-build: ## Build unit tests
 	@mkdir -p test/build
 	@cd test/build && cmake .. -DCMAKE_BUILD_TYPE=Debug >/dev/null && cmake --build . --parallel $(shell nproc | awk '{print ($$1 > 1 ? int($$1 / 2) : 1)}')
 
-test-run: ## Run unit tests (builds if needed)
-	@if [ ! -d test/build/bin ]; then $(MAKE) test-build; fi
+test-run: test-build ## Build and run unit tests
 	@test/scripts/run_tests.sh
 
 test-clean: ## Clean test build artifacts
@@ -129,7 +130,7 @@ test-clean: ## Clean test build artifacts
 help: ## Show this help
 	@echo "Papwick - Build System"
 	@echo ""
-	@echo "Usage: make [target] [ENV=fitness] [PORT=/dev/ttyACM0]"
+	@echo "Usage: make [target] [ENV=papwick] [PORT=/dev/ttyACM0]"
 	@awk 'BEGIN {FS = ":.*##"; section=""} \
 		/^##/ { section=substr($$0, 4); next } \
 		/^[a-zA-Z0-9_-]+:.*##/ { \

@@ -9,7 +9,7 @@ Touch works on the content. The buttons move through the flow. Each button has o
 - Swipe up or down: turn a wheel picker
 - Hold an app icon: open the app page in Settings
 - Blue button (left): back, or no in a question
-- Green button (right): confirm or next, or yes in a question
+- Green button (right): the main action of the screen, for example confirm, next or start, or yes in a question
 - Red click: go to the home screen. On the home screen, the click turns the screen off. When the screen is off, the click turns it on
 - Red double click: the "Power off?" question
 
@@ -57,7 +57,7 @@ Settings has a page for each group. Swipe left or right to change the page. Tap 
 ## Power
 
 - The screen dims at half the sleep time.
-- When a frame has no changes, the main loop waits 10 ms. During the wait, the idle task stops the CPU clock.
+- When a frame has no changes, the main loop waits 10 ms. During the wait, the idle task halts the CPU until the next interrupt (WAITI).
 - While the screen is off, the CPU runs at 80 MHz instead of 240 MHz. A lower clock stops the PLL, and then USB, Wi-Fi and I2S stop.
 - The speaker amplifier and the codec DAC are on only during a tone and for 3 s after it. With the sound off, they stay off.
 - With the vibration off, the motor gets no power.
@@ -93,7 +93,7 @@ The shell loop reads the input, controls the light and the red button, and gives
 
 An app implements `App` in `src/shell/Shell.h`:
 
-- `info()`: the id (also the NVS namespace), name, icon color and pictogram. The pictograms are in `lib/Ui/src/Icons.cpp` and use one stroke width
+- `info()`: the id (also the NVS namespace), name, icon color and pictogram. The pictograms are in `lib/Ui/src/Icons.cpp` and use one stroke width, except the gear teeth
 - `boot()`: loads the saved data once at start-up
 - `start()`, `stop()`: open and leave the app. `stop()` saves the state
 - `update()`, `draw()`, `animate()`: input, full frame and small animation

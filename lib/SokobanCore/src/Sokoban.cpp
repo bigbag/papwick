@@ -14,8 +14,8 @@ bool adjacent(const Level& map, uint8_t from, uint8_t to) {
 
 bool basic(const Game& game) {
   const Level* map = level(game.level);
-  if (!map || game.undoCount > kUndoLimit || game.undoNext >= kUndoLimit || game.pushes > game.moves ||
-      game.boxCount == 0 || game.boxCount > kMaxBoxes || terrain(game, game.player) == '#')
+  if (!map || game.version != kVersion || game.undoCount > kUndoLimit || game.undoNext >= kUndoLimit ||
+      game.pushes > game.moves || game.boxCount == 0 || game.boxCount > kMaxBoxes || terrain(game, game.player) == '#')
     return false;
   uint8_t expected = 0;
   for (unsigned i = 0; i < unsigned(map->width) * map->height; ++i)

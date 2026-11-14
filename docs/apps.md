@@ -6,7 +6,7 @@ A 28-day home workout plan with no equipment. The calorie values are estimates. 
 
 ### Onboarding
 
-The onboarding asks for units, sex, age, height, weight, target weight, push-ups in a row and low impact. A safety screen tells the user to stop at chest pain, dizziness or unusual shortness of breath. The last screen shows the BMI, the resting burn and the weeks to the target weight.
+The onboarding asks for sex, age, height, weight, target weight, push-ups in a row and low impact. A safety screen tells the user to stop at chest pain, dizziness or unusual shortness of breath. The last screen shows the BMI, the resting burn and the weeks to the target weight.
 
 The push-up answer sets the level: 0 to 10 is beginner, 11 to 25 is intermediate, more than 25 is advanced. The app suggests low impact when the BMI is 30 or more.
 
@@ -67,8 +67,7 @@ To tune the figure poses in `src/apps/fitness/Figure.cpp`, run `python3 scripts/
 - Each tile value has its own color.
 - Green asks to start a new game. After the game ends, green starts a new game at once.
 - A merge gives a short vibration. The 2048 tile plays a tone. The end of the game plays a low tone.
-- The app settings turn the sound and the vibration on or off.
-- The app settings also select the theme. "Soft" has soft colors and dark text. "Bright" has strong colors.
+- The app settings select the theme. "Soft" has soft colors and dark text. "Bright" has strong colors.
 - The app saves the board and the best score when the user leaves the app.
 
 ## Pomodoro
@@ -76,7 +75,7 @@ To tune the figure poses in `src/apps/fitness/Figure.cpp`, run `python3 scripts/
 A focus timer: 4 focus sessions of 25 minutes, with a 5-minute break after each session and a 15-minute break after the fourth.
 
 - Green starts, pauses or resumes a focus session, and skips a break.
-- Hold the screen to reset the timer.
+- Hold the screen to reset the timer. The app asks first.
 - At the end of a period, the device turns the screen on, vibrates and plays a tone. The timer also runs on the home screen and in other apps.
 - The "Start mode" setting selects "Auto" (the next period starts at once) or "Manual" (green starts the next period).
 - The screen goes off as set in Settings. The timer continues. The device does not keep the timer after a power off.
@@ -106,10 +105,12 @@ Turn off all lights on the 5 x 5 grid. A tap changes the light and its four neig
 
 ## Sokoban
 
-Push all boxes onto the targets. A box moves only when the worker pushes it, and the worker cannot pull a box.
+Push all boxes onto the targets. A cat pushes the boxes. A box moves only when the cat pushes it, and the cat cannot pull a box.
 
-- Swipe to move the worker.
+- Swipe to move the cat.
 - Green undoes the last move, up to 128 moves. After a solved level, green opens the next level.
 - Hold the screen to restart the level.
-- The app has 12 levels. The "Level" setting opens a level.
+- The app has 12 levels. They get harder, from 2 boxes to 5 boxes. The "Level" setting opens a level.
 - The app saves the game when the user leaves the app.
+
+To make new levels, run `python3 scripts/make_sokoban_levels.py 9 9 3`. The arguments are the width, the height and the number of boxes. The script prints the best levels with their push-optimal solutions. Add a level to `lib/SokobanCore/src/SokobanLevels.cpp` and its solution to `test/unit/SokobanTest.cpp`. A different number of levels also changes `kLevelCount` and `kLevelNames`.

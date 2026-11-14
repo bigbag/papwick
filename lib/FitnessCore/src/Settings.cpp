@@ -21,20 +21,6 @@ bool isValid(const Settings& s) {
          s.exercises < count(kExerciseCounts);
 }
 
-bool migrate(const SettingsV3& old, Settings& out, sys::Device& device) {
-  const Settings s = {kSettingsVersion, old.workTime, old.restTime, old.exercises};
-  sys::Device d = device;
-  d.sleep = old.sleep;
-  d.units = static_cast<uint8_t>(old.units);
-  d.volume = old.volume;
-  d.vibration = old.vibration;
-  d.brightness = old.brightness;
-  if (old.version != 3 || !isValid(s) || !sys::isValid(d)) return false;
-  out = s;
-  device = d;
-  return true;
-}
-
 Range weightRange(Units u) { return u == Units::Metric ? Range{40, 200, 0.5f, 1} : Range{89, 440, 1, 0}; }
 
 Range heightRange(Units u) { return u == Units::Metric ? Range{140, 210, 1, 0} : Range{56, 82, 1, 0}; }

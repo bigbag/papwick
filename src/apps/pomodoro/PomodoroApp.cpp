@@ -35,17 +35,29 @@ class PomodoroApp : public App {
   // The timer runs on in the background, so the alarm also comes on the home screen or in another app.
   void background() override { tick(millis()); }
 
+  void start() override { askReset_ = false; }
+
   void update(const ui::Input& in) override {
     const uint32_t now = millis();
     // The user pressed green for the old period, so a period change ignores the press.
     const bool changed = tick(now);
+    if (askReset_) {
+      if (in.green) {
+        pomodoro::reset(timer_);
+        LOG_INF(TAG, "Reset");
+      }
+      if (in.green || in.blue) {
+        askReset_ = false;
+        dirty = true;
+      }
+      return;
+    }
     if (in.blue) {
       shell::home();
       return;
     }
-    if (in.hold) {
-      pomodoro::reset(timer_);
-      LOG_INF(TAG, "Reset");
+    if (in.hold && timer_.run != pomodoro::RunState::Idle) {
+      askReset_ = true;
       dirty = true;
       return;
     }
@@ -71,6 +83,10 @@ class PomodoroApp : public App {
   }
 
   void draw() override {
+    if (askReset_) {
+      ui::confirmDraw(tr(RESET_TIMER_Q), tr(YES));
+      return;
+    }
     ui::clear();
     const bool focus = timer_.period == pomodoro::Period::Focus;
     const uint16_t color = focus ? kFocusColor : kBreakColor;
@@ -118,7 +134,7 @@ class PomodoroApp : public App {
     pomodoro::tick(timer_, now);
     const bool changed = timer_.period != before || timer_.run != run;
     if (changed) alarm();
-    if ((timer_.remainingMs + 999) / 1000 != shownSec_) dirty = true;
+    if (!askReset_ && (timer_.remainingMs + 999) / 1000 != shownSec_) dirty = true;
     return changed;
   }
 
@@ -162,6 +178,7 @@ class PomodoroApp : public App {
   PomodoroSettings settings_;
   pomodoro::Timer timer_;
   uint32_t shownSec_ = 0;
+  bool askReset_ = false;
 };
 
 }  // namespace

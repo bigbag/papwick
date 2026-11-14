@@ -21,9 +21,27 @@ static Direction direction(char c) {
 
 int main() {
   TestUtils::TestRunner runner("Sokoban board");
+  // Push-optimal solutions from a breadth-first search.
   const char* solutions[] = {
-      "RRD",        "URRUL",         "UUURDDRDL",       "LDLDRRUU",       "DDDLLUDLLUURR",   "LLDDLDRRURD",
-      "UULLDRURDD", "LULLRRDLLLUUU", "UULLLDDRDRURULL", "LLLRDDDDRURULL", "DLDDLUDLUDRRRUU", "LUUULDRDLDUULDD"};
+      "DDRRLLUURDLDRUURRDDUULLDDRLUURRRDDDLRUULDLDURRDLDLRUULD",
+      "DDRDDLUURURRDLULDLDDRUURUULLDRRRDRULLLDDLU",
+      "DRUURRUULLULDRRRDDLLUDRRUULULLDRRURDLLLLDRURRRRDDLLLULURURRDDUULLDRURDLLDDRRLLUURRDRDLDDRU",
+      "DLDDDRDRRRUULLUDRRULLLUURDLLDLDDRRDRRRUULULULLDDUURRDLULLDDRDLUUURDDLDDRRLLUURDRDRRLLULLDRR",
+      "DLLULDUULLDRURDRDRRULLLRDDDLLURDRRUULULDUULLDRURDRDDRDDLLLUURDDRRUUULULDDRLLDDRRRUULLDRLLDR",
+      "DDDDRRRRUUULRDDLLDLLUURLUURDLDDDRRRRUUULLDDRDDLLULUURLUURDRDULLDDDRRLLUUURRDDUULLDRURDLLDDRDRRUDLLURLLUURRDRRDRU"
+      "LLLULLDDRDRRURUUULLDDDLDR",
+      "RRRDULLLDDRDRDDDRRUUULLDLDLLUUURUURRRDDUURRDLULDULLLDDRDRDDDRRUUULRDDDLLLLLUUUURRDDRDDRRUUULLDDDLLLUUUURUURRRDDU"
+      "ULLLDDRDRDDDRRUUULRDDDLLULDLLUUUURRDDRDDRRUUULLDLDRUURUUULLLDDRDRDDLLDLUUUDDRRRUULDRDLLDLURRRDL",
+      "DDRDRLULUURDRDRDULULLDRDRDDLUUULUURDRDDLURULDDDDRUUDDRRULLULUURDRDULLDRDDLUURDDRRULDLLUURURDLLDDRURUULULDD",
+      "LLLLDLULUURDDDRDDLLURRRDRRUURULLLUURDLDLDLULUURDDRDDRDRRUUULRDDDLLLUUULDRDRDRRUUULLLDLULUURDDRDDDLLURDRRRRUUULLL"
+      "DDRRDRULLLLDRUUULDRDDLLURRRLDR",
+      "DRRRDDLDDRURRUULLULLLDDRLUURRRDDUULLLDDRRLLUURRRDRRDDLLULLLUURRRURRDULLDLLLDDRRRURURDLLDLLLUURRRDDDDLURUUULLLDDR"
+      "RLLUURRRDRRULLLLULDRRRDDLDDRUUURULLLRRDDDRRU",
+      "RDRDDRRRDDLLDLLURRRUULLLDURRRDDLLULURUULDDRRRURDLDRRLLDLLDLLURDRRURUULLLDRURRDDLDLUULURRRLLDDDLLURDRUULURDDRRURR"
+      "DLULUURDLDRDLLDLLUURURRURDLDDLDLUULURRR",
+      "RDDLLLULLUURRDULLDDDDRURRRRUULDRDLLLLDLLUURUURRDDUULLDDLDDRRULDDDRRURRUULLRRRUULDRDLDDLLDLLUUUUUURRDDDLRUUULLDDD"
+      "DDDRRURRUULLLRUUULLDDDDRURRRDDLURULLLDLDURURUUULLDDDRRULDLDRURRDDLDLLRRURUULLLDDURURRDDLDLDL",
+  };
   for (uint8_t i = 0; i < kLevelCount; ++i) {
     Game game;
     runner.expectTrue(start(game, i) && valid(game) && !isWon(game), "level starts valid and unsolved");
@@ -58,19 +76,21 @@ int main() {
   runner.expectTrue(game.player == initial.player && game.boxes == initial.boxes, "invalid start preserves game");
   runner.expectFalse(move(game, Direction::Up), "wall blocks movement");
   runner.expectTrue(game.moves == 0 && game.undoCount == 0, "blocked movement does not count");
-  runner.expectTrue(move(game, Direction::Right) && move(game, Direction::Right), "walk behind box");
-  runner.expectTrue(move(game, Direction::Down) && isWon(game), "push box onto goal");
+  // Level 1: the player is at the top left, two boxes are below and to the right of it.
+  runner.expectTrue(move(game, Direction::Down) && move(game, Direction::Down), "walk behind box");
+  runner.expectTrue(move(game, Direction::Right) && !isWon(game), "push box");
   runner.expectTrue(game.moves == 3 && game.pushes == 1, "moves and pushes counted");
   runner.expectTrue(undo(game) && game.pushes == 0 && game.moves == 2, "undo restores pushed box and counters");
-  runner.expectTrue(game.boxes[0] == initial.boxes[0], "undo restores box position");
+  runner.expectTrue(game.boxes == initial.boxes, "undo restores box position");
   runner.expectTrue(undo(game) && undo(game) && !undo(game), "undo stops at start");
   runner.expectTrue(game.player == initial.player && game.boxes == initial.boxes, "undo restores initial board");
   game = initial;
-  game.player = 24;
-  runner.expectTrue(move(game, Direction::Up), "push box towards wall");
-  runner.expectFalse(move(game, Direction::Up), "wall blocks box push");
-  const uint8_t boxAtWall = game.boxes[0];
-  runner.expectTrue(move(game, Direction::Down) && game.boxes[0] == boxAtWall, "walking away does not pull box");
+  runner.expectTrue(move(game, Direction::Down) && move(game, Direction::Down) && move(game, Direction::Right) &&
+                        move(game, Direction::Right) && move(game, Direction::Right),
+                    "push box towards wall");
+  runner.expectFalse(move(game, Direction::Right), "wall blocks box push");
+  const auto boxesAtWall = game.boxes;
+  runner.expectTrue(move(game, Direction::Left) && game.boxes == boxesAtWall, "walking away does not pull box");
   game = initial;
   for (unsigned i = 0; i < 140; ++i)
     runner.expectTrue(move(game, i % 2 ? Direction::Left : Direction::Right), "walking fills circular history");
@@ -81,7 +101,7 @@ int main() {
   start(game, 0);
   game.moves = std::numeric_limits<uint32_t>::max();
   game.pushes = std::numeric_limits<uint32_t>::max();
-  runner.expectTrue(move(game, Direction::Right) && move(game, Direction::Right) && move(game, Direction::Down),
+  runner.expectTrue(move(game, Direction::Down) && move(game, Direction::Down) && move(game, Direction::Right),
                     "saturated game can push");
   runner.expectTrue(valid(game) && undo(game) && undo(game) && undo(game), "saturated history reverses");
   runner.expectTrue(
@@ -104,6 +124,9 @@ int main() {
   bad = game;
   bad.boxes[0] = bad.player;
   runner.expectFalse(valid(bad), "box cannot overlap player");
+  bad = game;
+  bad.version = kVersion + 1;
+  runner.expectFalse(valid(bad), "unknown version rejected");
   bad = game;
   bad.pushes = bad.moves;
   const Game unchanged = bad;

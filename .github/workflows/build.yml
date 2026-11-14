@@ -28,7 +28,7 @@ jobs:
       - name: Run host tests
         run: make test
 
-      - name: Build fitness firmware
+      - name: Build firmware
         run: make build
 
       - name: Build probe firmware

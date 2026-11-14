@@ -22,13 +22,12 @@ Game generate(uint32_t toggles) {
   return game;
 }
 
-bool valid(const Game& game) { return (game.lights >> kCells) == 0 && game.cursor < kCells; }
+bool valid(const Game& game) { return game.version == kVersion && (game.lights >> kCells) == 0; }
 bool isWon(const Game& game) { return valid(game) && game.lights == 0; }
 
 bool toggle(Game& game, uint8_t index) {
   if (!valid(game) || isWon(game) || index >= kCells) return false;
   game.lights ^= mask(index);
-  game.cursor = index;
   if (game.moves != std::numeric_limits<uint32_t>::max()) ++game.moves;
   return true;
 }

@@ -20,7 +20,7 @@ App* const* appList = nullptr;
 int appCount = 0;
 App* current = nullptr;
 // The power question has its own redraw flag, so a background app cannot redraw it in each loop.
-bool powerMenu = false, menuDirty = false;
+bool powerMenu = false, menuDirty = false, menuUsb = false;
 uint32_t lastDrawMs = 0;
 
 const char* resetReason() {
@@ -32,18 +32,18 @@ const char* resetReason() {
   return r < sizeof(names) / sizeof(*names) ? names[r] : "unknown";
 }
 
-const char* powerQuestion() { return board::onUsb() ? tr(SCREEN_OFF_Q) : tr(POWER_OFF_Q); }
+const char* powerQuestion() { return menuUsb ? tr(SCREEN_OFF_Q) : tr(POWER_OFF_Q); }
 
 void powerOff() {
   powerMenu = false;
-  current->stop();
   board::stopAudio();
-  // With USB, the M5PM1 cuts only the display and the ESP32 continues to run.
+  // With USB, the M5PM1 cuts only the display and the ESP32 continues to run. The app stays open.
   if (board::onUsb()) {
     current->dirty = true;
     board::setLight(board::Light::Off);
     return;
   }
+  current->stop();
   ui::clear();
   ui::text(tr(POWER_OFF), ui::cx(), ui::cy(), &fonts::DejaVu24, ui::kGrey);
   ui::push();
@@ -85,7 +85,7 @@ void begin(App* const* apps, int count) {
   }
   if (!prefs.begin("sys", false)) LOG_ERR(TAG, "NVS open failed");
   sys::Device tmp;
-  if (prefs.isKey("device") && prefs.getBytes("device", &tmp, sizeof(tmp)) == sizeof(tmp) && sys::isValid(tmp)) {
+  if (shell::load(prefs, "device", tmp) && sys::isValid(tmp)) {
     dev = tmp;
   } else {
     LOG_INF(TAG, "No valid device settings in NVS");
@@ -110,8 +110,13 @@ void loop() {
   if (!wakeOnly) {
     if (in.redDouble) {
       powerMenu = menuDirty = true;
+      menuUsb = board::onUsb();
     } else if (powerMenu) {
-      if (in.green) {
+      if (in.green && board::onUsb() != menuUsb) {
+        // The power source changed, so the question changes and needs a new answer.
+        menuUsb = !menuUsb;
+        menuDirty = true;
+      } else if (in.green) {
         powerOff();
       } else if (in.blue || in.red) {
         powerMenu = false;
@@ -149,7 +154,7 @@ void loop() {
     lastDrawMs = ms;
     if (!powerMenu) current->animate();
   } else {
-    // The idle task stops the CPU clock until the next tick. A busy loop keeps the CPU at full power.
+    // The idle task halts the CPU until the next interrupt. A busy loop keeps the CPU at full power.
     delay(kIdleMs);
   }
 }

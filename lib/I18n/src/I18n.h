@@ -105,6 +105,7 @@
   X(NEW_GAME_Q, "New game?") \
   X(GAME_OVER, "Game over") \
   X(SOLVED, "Solved!") \
+  X(WIN_2048, "2048!") \
   X(THEME, "Theme") \
   X(FMT_SCORE, "%lu   best %lu") \
   X(FMT_MOVES, "%lu moves") \
@@ -114,6 +115,7 @@
   X(FMT_LEVEL, "Level %d") \
   X(FMT_MOVES_PUSHES, "%lu moves  %lu pushes") \
   X(RESTART_LEVEL_Q, "Restart level?") \
+  X(RESET_TIMER_Q, "Reset the timer?") \
   X(CONNECT4, "Four in a Row") \
   X(DIFFICULTY, "Difficulty") \
   X(YOUR_TURN, "Your turn") \

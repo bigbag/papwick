@@ -7,7 +7,6 @@
 #include <Preferences.h>
 #include <esp_random.h>
 
-#include <cstddef>
 #include <cstdio>
 #include <cstring>
 
@@ -21,9 +20,7 @@ constexpr int kTop = 95;
 constexpr uint8_t kThemeCount = 2;
 
 struct GameSettings {
-  uint8_t version = 1;
-  bool sound = true;
-  bool vibration = true;
+  uint8_t version = 2;
   uint8_t theme = 0;
 };
 
@@ -73,9 +70,7 @@ class Game : public App {
   void boot() override {
     if (!prefs_.begin(info().id, false)) LOG_ERR(TAG, "NVS open failed");
     GameSettings s;
-    // An older firmware saved the settings without the theme. The theme then keeps its default.
-    if (prefs_.isKey("settings") && prefs_.getBytes("settings", &s, sizeof(s)) >= offsetof(GameSettings, theme) &&
-        s.version == GameSettings{}.version)
+    if (shell::load(prefs_, "settings", s) && s.version == GameSettings{}.version && s.theme < kThemeCount)
       settings_ = s;
     g2048::Board b;
     if (prefs_.isKey("board") && prefs_.getBytes("board", &b, sizeof(b)) == sizeof(b) && g2048::isValid(b)) {
@@ -150,17 +145,15 @@ class Game : public App {
     if (!g2048::canMove(board_)) {
       ui::banner(tr(GAME_OVER), kTop + kBoard / 2, ui::kRed);
     } else if (winBanner_) {
-      ui::banner("2048!", kTop + kBoard / 2, ui::kAmber);
+      ui::banner(tr(WIN_2048), kTop + kBoard / 2, ui::kAmber);
     }
     ui::hints(410, tr(BACK), tr(NEW_GAME));
   }
 
   ui::Row* settings(int& count) override {
     static const char* const themes[kThemeCount] = {tr(SOFT), tr(BRIGHT)};
-    static ui::Row rows[] = {{tr(SOUND), ui::onOffLabels(), 2, reinterpret_cast<uint8_t*>(&settings_.sound)},
-                             {tr(VIBRATION), ui::onOffLabels(), 2, reinterpret_cast<uint8_t*>(&settings_.vibration)},
-                             {tr(THEME), themes, kThemeCount, &settings_.theme}};
-    count = sizeof(rows) / sizeof(*rows);
+    static ui::Row rows[] = {{tr(THEME), themes, kThemeCount, &settings_.theme}};
+    count = 1;
     return rows;
   }
 
@@ -189,14 +182,14 @@ class Game : public App {
     const g2048::MoveResult r = g2048::move(board_, d);
     if (!r.moved) return;
     winBanner_ = r.reachedWin;
-    if (r.merged && settings_.vibration) board::vibrate(25);
-    if (r.reachedWin && settings_.sound) {
+    if (r.merged) board::vibrate(25);
+    if (r.reachedWin) {
       board::beep(880, 120);
       board::beep(1320, 300);
     }
     if (!g2048::canMove(board_)) {
       LOG_INF(TAG, "Game over, score %lu", static_cast<unsigned long>(board_.score));
-      if (settings_.sound) board::beep(330, 400);
+      board::beep(330, 400);
     }
     dirty = true;
   }

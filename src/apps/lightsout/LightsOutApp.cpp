@@ -4,6 +4,7 @@
 #include <Logging.h>
 #include <esp_random.h>
 
+#include <algorithm>
 #include <cstdio>
 
 #include "App.h"
@@ -54,10 +55,10 @@ class LightsOutApp : public App {
       dirty = true;
       return;
     }
-    if (!in.tap) return;
-    const int x = in.x - left(), y = in.y - top();
+    if (!in.tap || !ui::Rect{left(), top(), kGrid, kGrid}.hit(in.x, in.y)) return;
+    const int x = std::clamp(in.x - left(), 0, kGrid - 1), y = std::clamp(in.y - top(), 0, kGrid - 1);
     const int pitch = kCell + kGap;
-    if (x < 0 || y < 0 || x >= kGrid || y >= kGrid || x % pitch >= kCell || y % pitch >= kCell) return;
+    if (x % pitch >= kCell || y % pitch >= kCell) return;
     if (!lightsout::toggle(game_, static_cast<uint8_t>(y / pitch * lightsout::kSide + x / pitch))) return;
     board::vibrate(20);
     if (lightsout::isWon(game_)) {

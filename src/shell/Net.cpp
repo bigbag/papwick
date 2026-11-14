@@ -43,7 +43,7 @@ void finish(Sync s) {
 void begin() {
   if (!prefs.begin("wifi", false)) LOG_ERR(TAG, "NVS open failed");
   sys::NetworkList tmp;
-  if (prefs.isKey("list") && prefs.getBytes("list", &tmp, sizeof(tmp)) == sizeof(tmp) && sys::isValid(tmp)) list = tmp;
+  if (shell::load(prefs, "list", tmp) && sys::isValid(tmp)) list = tmp;
   LOG_INF(TAG, "%u saved networks", list.count);
 }
 

@@ -6,6 +6,7 @@
 namespace sokoban {
 constexpr uint8_t kMaxSide = 12;
 constexpr uint8_t kMaxBoxes = 8;
+constexpr uint8_t kVersion = 1;
 constexpr uint8_t kLevelCount = 12;
 // shortcut: Keep 128 undo moves; increase this bound if longer undo is required.
 constexpr uint8_t kUndoLimit = 128;
@@ -24,6 +25,7 @@ struct Undo {
   bool countedPush = false;
 };
 struct Game {
+  uint8_t version = kVersion;
   uint8_t level = 0;
   uint8_t player = 0;
   uint8_t boxCount = 0;

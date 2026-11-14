@@ -24,7 +24,7 @@ include_directories(
 
 file(GLOB FITNESS_CORE_SRC ${PROJECT_ROOT}/lib/FitnessCore/src/*.cpp)
 file(GLOB SYSTEM_CORE_SRC ${PROJECT_ROOT}/lib/SystemCore/src/*.cpp)
-add_executable(FitnessCoreTest unit/FitnessCoreTest.cpp ${FITNESS_CORE_SRC} ${SYSTEM_CORE_SRC})
+add_executable(FitnessCoreTest unit/FitnessCoreTest.cpp ${FITNESS_CORE_SRC})
 target_compile_options(FitnessCoreTest PRIVATE -Wall -Wextra -Werror)
 
 file(GLOB GAME2048_CORE_SRC ${PROJECT_ROOT}/lib/Game2048Core/src/*.cpp)

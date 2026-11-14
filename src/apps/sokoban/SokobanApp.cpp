@@ -4,7 +4,9 @@
 #include <Sokoban.h>
 
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
+#include <initializer_list>
 
 #include "App.h"
 
@@ -17,9 +19,35 @@ constexpr uint16_t kFloor = lgfx::color565(32, 32, 36);
 constexpr uint16_t kGoal = lgfx::color565(200, 170, 90);
 constexpr uint16_t kBox = lgfx::color565(180, 140, 95);
 constexpr uint16_t kBoxDone = lgfx::color565(235, 205, 120);
-constexpr uint16_t kPlayer = lgfx::color565(235, 235, 240);
+constexpr uint16_t kFur = lgfx::color565(232, 232, 238);
+constexpr uint16_t kInnerEar = lgfx::color565(245, 160, 175);
+constexpr uint16_t kEye = lgfx::color565(30, 30, 36);
+constexpr uint16_t kNose = lgfx::color565(240, 130, 150);
+constexpr uint16_t kWhisker = lgfx::color565(140, 140, 150);
 constexpr const char* kLevelNames[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
 static_assert(sizeof(kLevelNames) / sizeof(*kLevelNames) == sokoban::kLevelCount, "one name for each level");
+
+// The worker is a cat face. The parts scale with the cell. Small cells get no inner ears and no whiskers.
+void drawCat(int x, int y, int cell) {
+  auto& c = ui::canvas();
+  const float cx = x + cell / 2.0f, cy = y + cell / 2.0f, h = cell / 2.0f - 2;
+  auto px = [&](float k) { return static_cast<int>(lroundf(cx + k * h)); };
+  auto py = [&](float k) { return static_cast<int>(lroundf(cy + k * h)); };
+  auto len = [&](float k, int least) { return std::max(least, static_cast<int>(lroundf(k * h))); };
+  const bool large = h >= 10;
+  for (int s : {-1, 1}) {
+    c.fillTriangle(px(s * 0.85f), py(0.05f), px(s * 0.7f), py(-0.95f), px(s * 0.1f), py(-0.4f), kFur);
+    if (large) c.fillTriangle(px(s * 0.7f), py(-0.1f), px(s * 0.64f), py(-0.7f), px(s * 0.3f), py(-0.38f), kInnerEar);
+  }
+  c.fillEllipse(px(0), py(0.225f), len(0.88f, 1), len(0.675f, 1), kFur);
+  for (int s : {-1, 1}) c.fillEllipse(px(s * 0.36f), py(0.12f), len(0.11f, 1), len(0.17f, 2), kEye);
+  c.fillTriangle(px(-0.13f), py(0.36f), px(0.13f), py(0.36f), px(0), py(0.5f), kNose);
+  if (!large) return;
+  for (int s : {-1, 1}) {
+    c.drawLine(px(s * 0.28f), py(0.5f), px(s * 1.0f), py(0.38f), kWhisker);
+    c.drawLine(px(s * 0.28f), py(0.55f), px(s * 1.0f), py(0.7f), kWhisker);
+  }
+}
 
 class SokobanApp : public App {
  public:
@@ -142,7 +170,7 @@ class SokobanApp : public App {
       if (sokoban::hasBox(game_, i)) {
         c.fillRoundRect(x + 3, y + 3, cell - 6, cell - 6, 4, t == '.' ? kBoxDone : kBox);
       } else if (i == game_.player) {
-        c.fillCircle(x + cell / 2, y + cell / 2, cell / 2 - 4, kPlayer);
+        drawCat(x, y, cell);
       }
     }
   }
