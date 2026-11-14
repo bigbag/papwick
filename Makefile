@@ -1,8 +1,8 @@
-# Makefile for Papwick
+# Makefile for Papwick firmware
 # Wraps PlatformIO commands for convenience
 
-.PHONY: all build upload flash monitor clean compiledb test test-build test-run test-clean \
-        backup restore format help
+.PHONY: all build upload flash clean size erase monitor format check compiledb \
+        backup restore test test-build test-run test-clean help
 
 # Prefer the project environment when it provides PlatformIO.
 ifneq ($(wildcard $(CURDIR)/.venv/bin/pio),)
@@ -12,6 +12,7 @@ endif
 ENV ?= fitness
 PORT ?= /dev/ttyACM0
 
+# Default target
 all: help
 
 ## Firmware:
@@ -19,22 +20,33 @@ all: help
 build: ## Build firmware (ENV=fitness|probe)
 	pio run -e $(ENV)
 
-upload: ## Build and flash firmware (ENV=..., PORT=...)
+upload: ## Build and flash to device (ENV=..., PORT=...)
 	pio run -e $(ENV) --target upload --upload-port $(PORT)
 
 flash: upload ## Alias for upload
 
-monitor: ## Open serial monitor
-	pio device monitor --port $(PORT) --dtr 0 --rts 0
-
 clean: ## Clean build artifacts
 	pio run -e $(ENV) --target clean
 
-compiledb: ## Generate compile_commands.json for clangd
-	pio run -e $(ENV) --target compiledb
+size: ## Show firmware size
+	pio run -e $(ENV) --target size
+
+erase: ## Erase device flash, including the saved settings and app data
+	pio run -e $(ENV) --target erase --upload-port $(PORT)
+
+monitor: ## Open serial monitor
+	pio device monitor --port $(PORT) --dtr 0 --rts 0
+
+## Code quality:
 
 format: ## Format code with clang-format
 	clang-format -i $$(find src lib examples test -path test/build -prune -o \( -name '*.cpp' -o -name '*.h' \) -print)
+
+check: ## Run static analysis (cppcheck)
+	pio check -e $(ENV)
+
+compiledb: ## Generate compile_commands.json for clangd
+	pio run -e $(ENV) --target compiledb
 
 ## Stock firmware:
 
@@ -47,12 +59,11 @@ restore: ## Write the stock firmware backup back to the device
 
 ## Unit Tests:
 
-test: test-build ## Build and run C++ unit tests
-	@test/scripts/run_tests.sh
+test: test-build test-run ## Build and run C++ unit tests
 
 test-build: ## Build unit tests
 	@mkdir -p test/build
-	@cd test/build && cmake .. -DCMAKE_BUILD_TYPE=Debug >/dev/null && cmake --build . --parallel
+	@cd test/build && cmake .. -DCMAKE_BUILD_TYPE=Debug >/dev/null && cmake --build . --parallel $(shell nproc | awk '{print ($$1 > 1 ? int($$1 / 2) : 1)}')
 
 test-run: ## Run unit tests (builds if needed)
 	@if [ ! -d test/build/bin ]; then $(MAKE) test-build; fi
@@ -67,5 +78,10 @@ help: ## Show this help
 	@echo "Papwick - Build System"
 	@echo ""
 	@echo "Usage: make [target] [ENV=fitness] [PORT=/dev/ttyACM0]"
-	@awk 'BEGIN {FS = ":.*##"} /^##/ { printf "\n%s\n", substr($$0, 4); next } \
-		/^[a-zA-Z_-]+:.*##/ { printf "  %-12s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*##"; section=""} \
+		/^##/ { section=substr($$0, 4); next } \
+		/^[a-zA-Z0-9_-]+:.*##/ { \
+			if (section != "") { printf "\n\033[1m%s\033[0m\n", section; section="" } \
+			printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 \
+		}' $(MAKEFILE_LIST)
+	@echo ""

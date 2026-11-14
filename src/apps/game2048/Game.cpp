@@ -6,6 +6,7 @@
 #include <Preferences.h>
 #include <esp_random.h>
 
+#include <cstddef>
 #include <cstdio>
 #include <cstring>
 
@@ -17,21 +18,50 @@ constexpr int kBoard = g2048::kSize * kCell + (g2048::kSize + 1) * kGap;
 constexpr int kTop = 95;
 
 constexpr const char* kOnOff[] = {"Off", "On"};
+constexpr const char* kThemes[] = {"Soft", "Bright"};
+constexpr uint8_t kThemeCount = sizeof(kThemes) / sizeof(*kThemes);
 
 struct GameSettings {
   uint8_t version = 1;
   bool sound = true;
   bool vibration = true;
+  uint8_t theme = 0;
 };
 
-uint16_t tileColor(uint8_t exponent) {
-  static const uint16_t colors[] = {
-      lgfx::color565(60, 58, 50),    lgfx::color565(238, 228, 218), lgfx::color565(237, 224, 200),
-      lgfx::color565(242, 177, 121), lgfx::color565(245, 149, 99),  lgfx::color565(246, 124, 95),
-      lgfx::color565(246, 94, 59),   lgfx::color565(237, 207, 114), lgfx::color565(237, 204, 97),
-      lgfx::color565(237, 200, 80),  lgfx::color565(237, 197, 63),  lgfx::color565(237, 194, 46)};
-  constexpr int n = sizeof(colors) / sizeof(*colors);
-  return exponent < n ? colors[exponent] : lgfx::color565(60, 58, 50);
+struct TileStyle {
+  uint16_t bg, fg;
+};
+
+// Each value has its own hue. "Soft" uses dark text, with a contrast of 6:1 or more.
+TileStyle tileStyle(uint8_t exponent, uint8_t theme) {
+  const uint16_t dark = lgfx::color565(60, 58, 50), text = lgfx::color565(40, 38, 34);
+  constexpr int n = 12;
+  static const TileStyle styles[kThemeCount][n] = {{{dark, TFT_WHITE},
+                                                    {lgfx::color565(234, 227, 215), text},  // 2
+                                                    {lgfx::color565(230, 224, 179), text},  // 4
+                                                    {lgfx::color565(228, 172, 139), text},  // 8
+                                                    {lgfx::color565(213, 151, 144), text},  // 16
+                                                    {lgfx::color565(209, 159, 179), text},  // 32
+                                                    {lgfx::color565(195, 169, 209), text},  // 64
+                                                    {lgfx::color565(155, 176, 212), text},  // 128
+                                                    {lgfx::color565(127, 184, 189), text},  // 256
+                                                    {lgfx::color565(140, 186, 148), text},  // 512
+                                                    {lgfx::color565(174, 189, 127), text},  // 1024
+                                                    {lgfx::color565(219, 191, 87), text}},  // 2048
+                                                   {{dark, TFT_WHITE},
+                                                    {lgfx::color565(238, 228, 218), dark},      // 2
+                                                    {lgfx::color565(237, 207, 140), dark},      // 4
+                                                    {lgfx::color565(242, 160, 90), dark},       // 8
+                                                    {lgfx::color565(210, 70, 60), TFT_WHITE},   // 16
+                                                    {lgfx::color565(200, 50, 110), TFT_WHITE},  // 32
+                                                    {lgfx::color565(150, 60, 190), TFT_WHITE},  // 64
+                                                    {lgfx::color565(70, 90, 200), TFT_WHITE},   // 128
+                                                    {lgfx::color565(20, 130, 150), TFT_WHITE},  // 256
+                                                    {lgfx::color565(30, 120, 60), TFT_WHITE},   // 512
+                                                    {lgfx::color565(140, 180, 40), dark},       // 1024
+                                                    {lgfx::color565(245, 200, 40), dark}}};     // 2048
+  const TileStyle* t = styles[theme < kThemeCount ? theme : 0];
+  return exponent < n ? t[exponent] : t[0];
 }
 
 class Game : public App {
@@ -44,7 +74,8 @@ class Game : public App {
   void boot() override {
     if (!prefs_.begin(info().id, false)) LOG_ERR(TAG, "NVS open failed");
     GameSettings s;
-    if (prefs_.isKey("settings") && prefs_.getBytes("settings", &s, sizeof(s)) == sizeof(s) &&
+    // An older firmware saved the settings without the theme. The theme then keeps its default.
+    if (prefs_.isKey("settings") && prefs_.getBytes("settings", &s, sizeof(s)) >= offsetof(GameSettings, theme) &&
         s.version == GameSettings{}.version)
       settings_ = s;
     g2048::Board b;
@@ -109,15 +140,13 @@ class Game : public App {
       for (int col = 0; col < g2048::kSize; ++col) {
         const uint8_t e = board_.cells[r][col];
         const int x = x0 + kGap + col * (kCell + kGap), y = kTop + kGap + r * (kCell + kGap);
-        const uint16_t bg = tileColor(e);
-        c.fillRoundRect(x, y, kCell, kCell, 6, bg);
+        const TileStyle style = tileStyle(e, settings_.theme);
+        c.fillRoundRect(x, y, kCell, kCell, 6, style.bg);
         if (e == 0) continue;
         snprintf(line, sizeof(line), "%lu", static_cast<unsigned long>(g2048::tileValue(e)));
         const size_t digits = strlen(line);
         const lgfx::IFont* font = digits <= 2 ? &fonts::DejaVu24 : (digits == 3 ? &fonts::DejaVu18 : &fonts::DejaVu12);
-        // White text has too little contrast on the light palette tiles. Only tiles past 2048 are dark.
-        const uint16_t dark = tileColor(0);
-        ui::text(line, x + kCell / 2, y + kCell / 2, font, bg == dark ? TFT_WHITE : dark);
+        ui::text(line, x + kCell / 2, y + kCell / 2, font, style.fg);
       }
     }
     if (!g2048::canMove(board_)) {
@@ -130,7 +159,8 @@ class Game : public App {
 
   ui::Row* settings(int& count) override {
     static ui::Row rows[] = {{"Sound", kOnOff, 2, reinterpret_cast<uint8_t*>(&settings_.sound)},
-                             {"Vibration", kOnOff, 2, reinterpret_cast<uint8_t*>(&settings_.vibration)}};
+                             {"Vibration", kOnOff, 2, reinterpret_cast<uint8_t*>(&settings_.vibration)},
+                             {"Theme", kThemes, kThemeCount, &settings_.theme}};
     count = sizeof(rows) / sizeof(*rows);
     return rows;
   }

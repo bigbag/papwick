@@ -1,47 +1,122 @@
 # Papwick
 
-Papwick is an app platform firmware for the [M5Stack TriviaPOD](https://docs.m5stack.com/en/core/TriviaPOD). It has a home screen, device settings, Wi-Fi time sync and two apps: Workout and 2048. M5Unified 0.3.0 runs the TriviaPOD as the M5Stack StopWatch (board 30).
+Papwick is an app platform firmware for the [M5Stack TriviaPOD](https://docs.m5stack.com/en/core/TriviaPOD). It has a home screen, device settings, Wi-Fi time sync and two apps: Workout and 2048.
 
-> The firmware replaces the stock Etermax trivia firmware. Make a backup before the first write. See [flashing](docs/flashing.md).
+> **Warning:** Papwick replaces the stock Etermax trivia firmware. The stock firmware has no public download. Make a [backup](docs/flashing.md#back-up-the-stock-firmware) before the first write.
 
-## Quick start
+This project is **not affiliated with M5Stack or Etermax**. It is a personal project.
+
+## Documentation
+
+- **Use:** [Platform](docs/platform.md), [Apps](docs/apps.md)
+- **Install:** [Flashing](docs/flashing.md)
+- **Hardware:** [Specifications](docs/triviapod-specifications.md)
+
+## Supported devices
+
+- **[M5Stack TriviaPOD](docs/triviapod-specifications.md)** (TP-01-A)
+  - SoC: ESP32-S3R8, 32 MB flash, 8 MB PSRAM
+  - Display: 466 x 466 round AMOLED with touch
+  - M5Unified 0.3.0 runs the device as the M5Stack StopWatch (board 30)
+
+## Features
+
+### Platform
+
+- Home screen with one app on each page, the clock and the battery level
+- Touch for the content, physical buttons for the flow: blue is back, green is confirm
+- Red button: a click goes home, a double click asks to power off
+- Wheel pickers for numbers, dates and times
+- Settings for brightness, sleep, sound, vibration and units
+- App manager with the app settings and Clear data for each app
+
+### Network and time
+
+- Wi-Fi setup through a hotspot with a QR code, or through a form page in the home network
+- Up to 4 saved networks
+- NTP time sync with UTC offset time zones, from UTC-12 to UTC+14
+
+### Apps
+
+- **Workout:** a 28-day home workout plan with no equipment, animated exercises, a weight log and statistics
+- **2048:** the tile game with swipe control and two color themes
+
+## Installing
+
+Make a backup of the stock firmware first. Then build and flash Papwick:
 
 ```bash
-uv sync         # .venv with Python 3.13 and PlatformIO 6.2.0
-make backup     # once, before the first write; needs esptool 5 or later on PATH
-make upload     # build and flash the firmware
-make monitor    # read the serial log
-make test       # run the host unit tests
+make backup
+make upload
 ```
 
-## Firmware
+To go back to the stock firmware, run `make restore`. See [flashing](docs/flashing.md) for the details and the known problems.
 
-| ENV | Source | Function |
-| --- | --- | --- |
-| `fitness` (default) | `src/` | The platform and its apps |
-| `probe` | `examples/probe/` | Hardware self-test: display, touch, buttons, speaker, microphone, vibration, IMU, RTC and battery |
+## Development
 
-## Documents
+### Prerequisites
 
-- [Platform](docs/platform.md): controls, screens, Wi-Fi, time, software structure and storage.
-- [Apps](docs/apps.md): Workout and 2048.
-- [Specifications](docs/triviapod-specifications.md): hardware, pins and power button.
-- [Flashing](docs/flashing.md): backup, restore and upload.
+- [uv](https://docs.astral.sh/uv/) and Python 3.13 for PlatformIO 6.2.0
+- esptool 5 or later on `PATH`, for `make backup` and `make restore`
+- CMake 3.16 or later and a C++17 compiler, for the host tests
+- clang-format, for `make format`
+- USB-C data cable
 
-## Layout
+### Checking out the code
 
-| Path | Contents |
-| --- | --- |
-| `src/shell/` | Platform: app interface, run loop, launcher, settings, Wi-Fi setup and time sync |
-| `src/apps/` | Apps: `fitness/` (Workout) and `game2048/` |
-| `lib/BoardSupport/` | Hardware library: input, light and power, tones, vibration, microphone, clock, NTP and Wi-Fi |
-| `lib/Ui/` | Drawing helpers, wheel pickers, settings rows and confirm screens |
-| `lib/FitnessCore/` | Workout rules without hardware code; host-tested |
-| `lib/Game2048Core/` | 2048 rules; host-tested |
-| `lib/SystemCore/` | Device settings, time zones and saved Wi-Fi networks; host-tested |
-| `lib/Logging/` | `LOG_ERR/WRN/INF/DBG` serial log macros |
-| `examples/` | Hardware examples; one PlatformIO env each |
-| `test/` | Host unit tests |
-| `scripts/` | `backup_flash.sh`, `preview_figures.py` |
+```bash
+git clone https://github.com/bigbag/papwick
+cd papwick
+uv sync
+```
+
+`uv sync` makes a `.venv` with PlatformIO. The `Makefile` puts `.venv/bin` first in `PATH`.
+
+### Building
+
+Run the host tests before you build the firmware:
+
+```bash
+# Build and run the host tests
+make test
+
+# Build the firmware
+make build
+
+# Build the hardware self-test
+make build ENV=probe
+
+# Run the static analysis
+make check
+```
+
+### Flashing your device
+
+```bash
+# Build and flash the firmware
+make upload
+
+# Build and flash the hardware self-test
+make upload ENV=probe
+
+# Use another serial port
+make upload PORT=/dev/ttyACM1
+```
+
+The upload resets the chip into download mode through USB. Buttons are not necessary.
+
+### Serial monitor
+
+```bash
+make monitor
+```
+
+The monitor opens the port with DTR and RTS low. A program that raises them can reset the chip into download mode. See [flashing](docs/flashing.md#flash-the-firmware) for the recovery.
 
 Run `make help` for all commands.
+
+---
+
+Papwick uses [M5Unified](https://github.com/m5stack/M5Unified) and [M5GFX](https://github.com/m5stack/M5GFX) by M5Stack.
+
+**Not affiliated with M5Stack or Etermax.**

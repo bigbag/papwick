@@ -14,55 +14,49 @@ Sources:
 
 ## Hardware
 
-| Block | Part | Source |
-| --- | --- | --- |
-| SoC | ESP32-S3R8 (QFN56), revision v0.2, dual-core LX7 at 240 MHz, Wi-Fi 2.4 GHz, BLE 5 | Official, esptool |
-| PSRAM | 8 MB octal, in package (AP_3v3) | Official, esptool |
-| Flash | 32 MB, DIO mode, 80 MHz | Official, esptool, stock bootloader header |
-| Crystal | 40 MHz | esptool |
-| Display | 1.75 in round AMOLED, 466 x 466, QSPI, CO5300 driver (480 x 480 memory) | Official size; driver from StopWatch |
-| Touch | CST816S at 0x15 or CST9217 at 0x5A | StopWatch |
-| Buttons | 2 programmable + 1 power | Official |
-| Haptics | Vibration motor on M5IOE1 PWM1 (G9), 2 kHz | Official motor; pin from StopWatch |
-| Audio | ES8311 codec at 0x18, 8 ohm 1 W 1318 cavity speaker, MEMS microphone | Official speaker and mic; codec from StopWatch |
-| IMU | BMI270 at 0x68 | Official |
-| RTC | RX8130CE at 0x32 | Official |
-| PMIC | M5PM1 at 0x6E | StopWatch |
-| IO expander | M5IOE1 at 0x4F | StopWatch |
-| Battery | 450 mAh Li-ion, USB-C 5 V charge | Official |
-| USB | Native USB Serial/JTAG, VID 303a, PID 1001 | Verified |
-| Expansion | None: no Grove port, no rear header, no magnet | Official |
+- SoC: ESP32-S3R8 (QFN56), revision v0.2, dual-core LX7 at 240 MHz, Wi-Fi 2.4 GHz, BLE 5 (source: Official, esptool)
+- PSRAM: 8 MB octal, in package (AP_3v3) (source: Official, esptool)
+- Flash: 32 MB, DIO mode, 80 MHz (source: Official, esptool, stock bootloader header)
+- Crystal: 40 MHz (source: esptool)
+- Display: 1.75 in round AMOLED, 466 x 466, QSPI, CO5300 driver (480 x 480 memory) (source: Official size; driver from StopWatch)
+- Touch: CST816S at 0x15 or CST9217 at 0x5A (source: StopWatch)
+- Buttons: 2 programmable + 1 power (source: Official)
+- Haptics: vibration motor on M5IOE1 PWM1 (G9), 2 kHz (source: Official motor; pin from StopWatch)
+- Audio: ES8311 codec at 0x18, 8 ohm 1 W 1318 cavity speaker, MEMS microphone (source: Official speaker and mic; codec from StopWatch)
+- IMU: BMI270 at 0x68 (source: Official)
+- RTC: RX8130CE at 0x32 (source: Official)
+- PMIC: M5PM1 at 0x6E (source: StopWatch)
+- IO expander: M5IOE1 at 0x4F (source: StopWatch)
+- Battery: 450 mAh Li-ion, USB-C 5 V charge (source: Official)
+- USB: native USB Serial/JTAG, VID 303a, PID 1001 (source: Verified)
+- Expansion: none. No Grove port, no rear header, no magnet (source: Official)
 
 ## Pin map
 
-| GPIO | Function | Status |
-| --- | --- | --- |
-| 1 | Button B (green), active low, external pull-up | Verified |
-| 2 | Button A (blue), active low, external pull-up | Verified |
-| 12 | M5PM1 interrupt | StopWatch |
-| 13 | Touch interrupt | Verified |
-| 15 | I2S WS | Verified |
-| 16 | I2S data in (microphone, I2S1) | Verified |
-| 17 | I2S BCK | Verified |
-| 18 | I2S MCK | Verified |
-| 21 | I2S data out (speaker, I2S0) | Verified |
-| 38 | Display TE input | StopWatch |
-| 39 | Display CS | Verified |
-| 40 | QSPI SCLK | Verified |
-| 41, 42, 46, 45 | QSPI IO0, IO1, IO2, IO3 | Verified |
-| 47 | Internal I2C SDA, port 1 | Verified |
-| 48 | Internal I2C SCL, port 1 | Verified |
-| 19, 20 | USB D-, D+ | Verified |
-| 26 to 37 | Octal PSRAM | Verified |
-| 0 | BOOT, driven by M5PM1 BOOT_OUT_OD on the StopWatch | StopWatch |
+- GPIO 1: Button B (green), active low, external pull-up (verified)
+- GPIO 2: Button A (blue), active low, external pull-up (verified)
+- GPIO 12: M5PM1 interrupt (from the StopWatch)
+- GPIO 13: Touch interrupt (verified)
+- GPIO 15: I2S WS (verified)
+- GPIO 16: I2S data in (microphone, I2S1) (verified)
+- GPIO 17: I2S BCK (verified)
+- GPIO 18: I2S MCK (verified)
+- GPIO 21: I2S data out (speaker, I2S0) (verified)
+- GPIO 38: Display TE input (from the StopWatch)
+- GPIO 39: Display CS (verified)
+- GPIO 40: QSPI SCLK (verified)
+- GPIO 41, 42, 46, 45: QSPI IO0, IO1, IO2, IO3 (verified)
+- GPIO 47: Internal I2C SDA, port 1 (verified)
+- GPIO 48: Internal I2C SCL, port 1 (verified)
+- GPIO 19, 20: USB D-, D+ (verified)
+- GPIO 26 to 37: Octal PSRAM (verified)
+- GPIO 0: BOOT, driven by M5PM1 BOOT_OUT_OD on the StopWatch (from the StopWatch)
 
 M5IOE1 lines:
 
-| M5IOE1 pin | Function |
-| --- | --- |
-| G3 | Audio codec power |
-| G9 (PWM1) | Vibration motor |
-| G10 | Speaker amplifier enable |
+- G3: Audio codec power
+- G9 (PWM1): Vibration motor
+- G10: Speaker amplifier enable
 
 The speaker and the microphone share the ES8311 codec and the I2S clock pins. Stop one before you start the other.
 
@@ -70,31 +64,27 @@ The speaker and the microphone share the ES8311 codec and the I2S clock pins. St
 
 The stock partition table at 0x8000:
 
-| Name | Type | Offset | Size |
-| --- | --- | --- | --- |
-| nvs | data/nvs | 0x9000 | 20 KB |
-| otadata | data/ota | 0xE000 | 8 KB |
-| recovery | app/factory | 0x10000 | 3584 KB |
-| app0 | app/ota_0 | 0x390000 | 15360 KB |
-| spiffs | data/spiffs | 0x1290000 | 10240 KB |
-| ram_data | data/spiffs | 0x1C90000 | 64 KB |
-| coredump | data/coredump | 0x1CA0000 | 64 KB |
+- nvs: data/nvs at 0x9000, 20 KB
+- otadata: data/ota at 0xE000, 8 KB
+- recovery: app/factory at 0x10000, 3584 KB
+- app0: app/ota_0 at 0x390000, 15360 KB
+- spiffs: data/spiffs at 0x1290000, 10240 KB
+- ram_data: data/spiffs at 0x1C90000, 64 KB
+- coredump: data/coredump at 0x1CA0000, 64 KB
 
 ## Probe results
 
 The `probe` example gives these results on a TP-01-A unit. M5Unified 0.3.0 runs the device as board 30 (`board_M5StopWatch`).
 
-| Function | Result |
-| --- | --- |
-| Display | Works. M5GFX reports 468 x 468; the visible round area is 466 px wide |
-| Touch | Works, CST816S at 0x15 |
-| Buttons A, B, PWR | Work |
-| Speaker | Works through `M5.Speaker` |
-| Microphone | Works through `M5.Mic` |
-| Vibration | Works through `M5.Power.setVibration()` |
-| IMU | Works, 1 g on Z when flat |
-| Battery level | Works, `M5.Power.getBatteryLevel()` |
-| I2C scan before audio power-up | 0x15, 0x32, 0x4F, 0x68, 0x6E |
+- Display: Works. M5GFX reports 468 x 468; the visible round area is 466 px wide
+- Touch: Works, CST816S at 0x15
+- Buttons A, B, PWR: Work
+- Speaker: Works through `M5.Speaker`
+- Microphone: Works through `M5.Mic`
+- Vibration: Works through `M5.Power.setVibration()`
+- IMU: Works, 1 g on Z when flat
+- Battery level: Works, `M5.Power.getBatteryLevel()`
+- I2C scan before audio power-up: 0x15, 0x32, 0x4F, 0x68, 0x6E
 
 The ES8311 (0x18) does not answer the scan in `setup()`. Its power rail (M5IOE1 G3) is off until `M5.Speaker` or `M5.Mic` starts.
 

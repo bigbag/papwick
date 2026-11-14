@@ -4,16 +4,16 @@
 
 Touch works on the content. The buttons move through the flow. Each button has one meaning on all screens.
 
-| Input | Action |
-| --- | --- |
-| Tap | Select an item or change an option |
-| Swipe left or right | Change the page or the app |
-| Swipe up or down | Turn a wheel picker |
-| Hold an app icon | Open the app page in Settings |
-| Blue button (left) | Back. In a question: no |
-| Green button (right) | Confirm or next. In a question: yes |
-| Red click | Go to the home screen. On the home screen: screen off. When the screen is off: screen on |
-| Red double click | "Power off?" question |
+- Tap: select an item or change an option
+- Swipe left or right: change the page or the app
+- Swipe up or down: turn a wheel picker
+- Hold an app icon: open the app page in Settings
+- Blue button (left): back, or no in a question
+- Green button (right): confirm or next, or yes in a question
+- Red click: go to the home screen. On the home screen, the click turns the screen off. When the screen is off, the click turns it on
+- Red double click: the "Power off?" question
+
+More rules:
 
 - A screen has no Back, OK or Next buttons. The bottom band shows the labels of the blue and green buttons.
 - On-screen controls do not use blue or green. These colors mean the physical buttons.
@@ -48,13 +48,11 @@ The home screen shows one app at a time, with the clock, the battery level and p
 
 Settings has five pages. Swipe left or right to change the page. Tap a row to change it.
 
-| Page | Rows |
-| --- | --- |
-| Device | Brightness, Sleep (30 s, 1 min, 2 min, 5 min, never), Sound, Vibration, Units (metric or imperial) |
-| Time | Zone, Set time, Sync now |
-| Wi-Fi | Add network, and the saved networks. Tap a network to forget it |
-| Apps | One row for each app. The app page shows the app settings, Clear data and the number of saved NVS entries |
-| About | Build date, battery, free RAM, Reset all |
+- Device: brightness, sleep (30 s, 1 min, 2 min, 5 min, never), sound, vibration, units (metric or imperial)
+- Time: zone, set time, sync now
+- Wi-Fi: add network, and the saved networks. Tap a network to forget it
+- Apps: one row for each app. The app page shows the app settings, Clear data and the number of saved NVS entries
+- About: build date, battery, free RAM, reset all
 
 The screen dims at half the sleep time.
 
@@ -87,15 +85,13 @@ The shell loop reads the input, controls the light and the red button, and gives
 
 An app implements `App` in `src/shell/Shell.h`:
 
-| Method | Function |
-| --- | --- |
-| `info()` | Id (also the NVS namespace), name, icon color and icon text |
-| `boot()` | Loads the saved data once at start-up |
-| `start()`, `stop()` | Open and leave the app. `stop()` saves the state |
-| `update()`, `draw()`, `animate()` | Input, full frame, small animation |
-| `keepAwake()` | True keeps the screen on, for example during a workout |
-| `settings()`, `settingsChanged()` | The setting rows for Settings > Apps |
-| `clearData()` | Clears the app data |
+- `info()`: the id (also the NVS namespace), name, icon color and icon text
+- `boot()`: loads the saved data once at start-up
+- `start()`, `stop()`: open and leave the app. `stop()` saves the state
+- `update()`, `draw()`, `animate()`: input, full frame and small animation
+- `keepAwake()`: true keeps the screen on, for example during a workout
+- `settings()`, `settingsChanged()`: the setting rows for Settings > Apps
+- `clearData()`: clears the app data
 
 Rules for apps:
 
@@ -107,10 +103,8 @@ Rules for apps:
 
 The data is in NVS (`Preferences`):
 
-| Namespace | Data |
-| --- | --- |
-| `sys` | Device settings |
-| `wifi` | Saved networks |
-| `fit`, `g2048` | App data, one namespace for each app id |
+- `sys`: device settings
+- `wifi`: saved networks
+- `fit`, `g2048`: app data, one namespace for each app id
 
 Each saved struct has a version. The firmware ignores a struct of an unknown version and uses the defaults. Reset all clears all namespaces and restarts the device.
