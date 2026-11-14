@@ -1,0 +1,11 @@
+{
+  "name": "SystemCore",
+  "version": "1.0.0",
+  "description": "Device settings, time zone text and saved Wi-Fi networks without hardware dependencies",
+  "frameworks": ["arduino", "espidf"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src"
+  }
+}

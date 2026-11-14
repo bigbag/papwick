@@ -1,0 +1,11 @@
+{
+  "name": "BoardSupport",
+  "version": "1.0.0",
+  "description": "TriviaPOD start-up helpers on top of M5Unified",
+  "frameworks": ["arduino"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src"
+  }
+}

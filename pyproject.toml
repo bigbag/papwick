@@ -1,0 +1,9 @@
+[project]
+name = "papwick"
+version = "0.1.0"
+description = "App platform firmware and hardware examples for the M5Stack TriviaPOD"
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "platformio>=6.2.0",
+]

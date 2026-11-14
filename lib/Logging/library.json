@@ -1,0 +1,11 @@
+{
+  "name": "Logging",
+  "version": "1.0.0",
+  "description": "Serial logging with LOG_ERR/WRN/INF/DBG macros and a millisecond time stamp",
+  "frameworks": ["arduino"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src"
+  }
+}

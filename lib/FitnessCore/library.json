@@ -1,0 +1,11 @@
+{
+  "name": "FitnessCore",
+  "version": "1.0.0",
+  "description": "Workout plan, exercise catalog, body formulas and workout session without hardware dependencies",
+  "frameworks": ["arduino", "espidf"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src"
+  }
+}

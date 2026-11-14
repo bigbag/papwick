@@ -1,0 +1,11 @@
+{
+  "name": "Game2048Core",
+  "version": "1.0.0",
+  "description": "2048 board rules without hardware dependencies",
+  "frameworks": ["arduino", "espidf"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src"
+  }
+}

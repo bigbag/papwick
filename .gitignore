@@ -1,0 +1,14 @@
+.pio/
+.venv/
+.cache/
+.idea/
+.vscode/
+.DS_Store
+__pycache__/
+test/build/
+compile_commands.json
+.claude/
+CLAUDE.md
+AGENTS.md
+# The dump of the stock firmware (32 MB). It contains Etermax code, so it stays local.
+backup/

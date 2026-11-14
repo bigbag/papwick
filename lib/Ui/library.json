@@ -1,0 +1,11 @@
+{
+  "name": "Ui",
+  "version": "1.0.0",
+  "description": "Drawing helpers, pickers, option rows and confirm screens for the round TriviaPOD screen",
+  "frameworks": ["arduino"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src"
+  }
+}
