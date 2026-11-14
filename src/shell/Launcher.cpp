@@ -1,4 +1,5 @@
 #include <BoardSupport.h>
+#include <I18n.h>
 
 #include <cstdio>
 #include <ctime>
@@ -12,7 +13,7 @@ constexpr int kIconR = 80;
 class Launcher : public App {
  public:
   const AppInfo& info() const override {
-    static const AppInfo i = {"launcher", "Home", ui::kGrey, ""};
+    static const AppInfo i = {"launcher", tr(HOME), ui::kGrey, nullptr};
     return i;
   }
 
@@ -47,11 +48,10 @@ class Launcher : public App {
 
     const AppInfo& a = entry(selected_).info();
     ui::canvas().fillCircle(ui::cx(), kIconY, kIconR, a.color);
-    ui::text(a.glyph, ui::cx(), kIconY, &fonts::DejaVu40, TFT_BLACK);
+    if (a.icon) a.icon(ui::cx(), kIconY, TFT_BLACK, a.color);
     ui::text(a.name, ui::cx(), 335, &fonts::DejaVu24);
-    ui::hints(380, nullptr, "open");
-    snprintf(line, sizeof(line), "%d%%%s", board::batteryLevel(), board::onUsb() ? " USB" : "");
-    ui::text(line, ui::cx(), 420, &fonts::DejaVu18, ui::kGrey);
+    ui::hints(380, nullptr, tr(OPEN));
+    ui::battery(ui::cx(), 420);
     ui::pageDots(selected_, entryCount());
   }
 

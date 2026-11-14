@@ -40,13 +40,34 @@ This command checks `backup/SHA256SUMS` and writes the full image at 0x0.
 ## Flash the firmware
 
 ```bash
-make upload ENV=probe
+make upload
 make monitor
 ```
 
-Open the serial port with DTR and RTS low. `make monitor` does this. The USB Serial/JTAG port uses DTR and RTS as the boot and reset lines. A program that raises them can reset the chip into download mode. Then the screen stays black, and the log shows `boot:0x23 (DOWNLOAD(USB/UART0))` and `waiting for download`. To start the app again, run `esptool --chip esp32s3 -p /dev/ttyACM0 --before no-reset --after no-reset run`. Then open the port with DTR and RTS low.
+`make upload ENV=probe` flashes the hardware self-test.
+
+The USB Serial/JTAG port uses DTR and RTS as the boot and reset lines. `make monitor` opens the port with DTR and RTS low. A program that raises them can reset the chip into download mode. See [troubleshooting](troubleshooting.md#the-device-stays-in-download-mode).
 
 The upload writes the bootloader (0x0), the partition table (0x8000), `boot_app0` (0xE000) and the app (0x10000). The partition table is `default_16MB.csv`, so the upper 16 MB of the flash keep the old stock data.
+
+## Install a release
+
+`make release` writes two files into `dist/`:
+
+- `papwick-<version>-full.bin` holds the bootloader, the partition table and the app.
+- `papwick-<version>.bin` holds the app only.
+
+Use the full image for the first install. Caution: the full image also erases the saved settings and the app data (NVS).
+
+```bash
+esptool --chip esp32s3 -p /dev/ttyACM0 write-flash 0 papwick-<version>-full.bin
+```
+
+Use the app image to update. It writes the app at 0x10000 and keeps the saved data:
+
+```bash
+esptool --chip esp32s3 -p /dev/ttyACM0 write-flash 0x10000 papwick-<version>.bin
+```
 
 ## PlatformIO and Python
 

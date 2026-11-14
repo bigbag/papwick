@@ -13,6 +13,10 @@ constexpr const char* TAG = "POWER";
 constexpr uint8_t kDimBrightness = 20;
 constexpr int kUsbPresentMv = 4000;
 constexpr uint32_t kLedCheckMs = 2000;
+// 80 MHz is the lowest clock that keeps the PLL, so USB, Wi-Fi and I2S continue to work.
+constexpr uint32_t kIdleMhz = 80, kActiveMhz = 240;
+constexpr uint8_t kImuAddr = 0x68, kImuPwrConf = 0x7C, kImuPwrCtrl = 0x7D;
+constexpr uint32_t kI2cHz = 400000;
 
 Light current = Light::On;
 uint8_t brightness = 160;
@@ -35,7 +39,9 @@ void setLight(Light next) {
   if (next == current) return;
   if (next == Light::Off) {
     M5.Display.sleep();
+    setCpuFrequencyMhz(kIdleMhz);
   } else if (current == Light::Off) {
+    setCpuFrequencyMhz(kActiveMhz);
     M5.Display.wakeup();
   }
   current = next;
@@ -44,6 +50,11 @@ void setLight(Light next) {
 }
 
 Light light() { return current; }
+
+void wake() {
+  lastInputMs = millis();
+  setLight(Light::On);
+}
 
 bool updateLight(const Input& in, uint32_t offMs) {
   const uint32_t now = millis();
@@ -90,6 +101,14 @@ void powerOff() {
   delay(1000);
   LOG_WRN(TAG, "Power off failed, restart");
   ESP.restart();
+}
+
+void imuOff() {
+  // PWR_CTRL 0 stops all sensors. PWR_CONF 0x03 is the reset value with the advanced power save.
+  if (!M5.In_I2C.writeRegister8(kImuAddr, kImuPwrCtrl, 0x00, kI2cHz) ||
+      !M5.In_I2C.writeRegister8(kImuAddr, kImuPwrConf, 0x03, kI2cHz)) {
+    LOG_ERR(TAG, "IMU suspend failed");
+  }
 }
 
 }  // namespace board

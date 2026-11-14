@@ -70,3 +70,46 @@ To tune the figure poses in `src/apps/fitness/Figure.cpp`, run `python3 scripts/
 - The app settings turn the sound and the vibration on or off.
 - The app settings also select the theme. "Soft" has soft colors and dark text. "Bright" has strong colors.
 - The app saves the board and the best score when the user leaves the app.
+
+## Pomodoro
+
+A focus timer: 4 focus sessions of 25 minutes, with a 5-minute break after each session and a 15-minute break after the fourth.
+
+- Green starts, pauses or resumes a focus session, and skips a break.
+- Hold the screen to reset the timer.
+- At the end of a period, the device turns the screen on, vibrates and plays a tone. The timer also runs on the home screen and in other apps.
+- The "Start mode" setting selects "Auto" (the next period starts at once) or "Manual" (green starts the next period).
+- The screen goes off as set in Settings. The timer continues. The device does not keep the timer after a power off.
+
+## Clock
+
+A watch face with the time, the date and the battery level. Tap the screen or push green to change between the analog and the digital face.
+
+The face is black with white marks, so the AMOLED uses little power. The face changes once a minute. The screen goes off as set in Settings, and the clock has no always-on mode.
+
+## Four in a Row
+
+Put four discs in a row before the device does. Tap a column to drop a disc. The row can be horizontal, vertical or diagonal.
+
+- The device answers after the move of the player is on the screen.
+- The first move alternates between the player and the device.
+- Green asks to start a new game. After the game ends, green starts a new game at once.
+- The "Difficulty" setting selects "Easy", "Normal" or "Hard". The device looks 1, 4 or 8 half moves ahead.
+- The app saves the board and the totals of wins, losses and draws.
+
+## Lights Out
+
+Turn off all lights on the 5 x 5 grid. A tap changes the light and its four neighbors. Each game is solvable.
+
+- Green asks to start a new game. After a solved game, green starts a new game at once.
+- The app saves the game when the user leaves the app.
+
+## Sokoban
+
+Push all boxes onto the targets. A box moves only when the worker pushes it, and the worker cannot pull a box.
+
+- Swipe to move the worker.
+- Green undoes the last move, up to 128 moves. After a solved level, green opens the next level.
+- Hold the screen to restart the level.
+- The app has 12 levels. The "Level" setting opens a level.
+- The app saves the game when the user leaves the app.

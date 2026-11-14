@@ -1,0 +1,11 @@
+{
+  "name": "LightsOutCore",
+  "version": "1.0.0",
+  "description": "Lights Out board rules without hardware dependencies",
+  "frameworks": ["arduino", "espidf"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src"
+  }
+}

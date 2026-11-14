@@ -78,7 +78,7 @@ Screen& screenFor(ScreenId id) {
 class Fitness : public App {
  public:
   const AppInfo& info() const override {
-    static const AppInfo i = {"fit", "Workout", lgfx::color565(149, 117, 205), "FIT"};
+    static const AppInfo i = {"fit", "Workout", lgfx::color565(149, 117, 205), icon::dumbbell};
     return i;
   }
 

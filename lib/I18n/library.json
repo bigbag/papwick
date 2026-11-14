@@ -1,0 +1,11 @@
+{
+  "name": "I18n",
+  "version": "1.0.0",
+  "description": "User interface strings without hardware dependencies",
+  "frameworks": ["arduino", "espidf"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src"
+  }
+}

@@ -2,6 +2,7 @@
 
 #include <BoardSupport.h>
 #include <DNSServer.h>
+#include <I18n.h>
 #include <Logging.h>
 #include <WebServer.h>
 #include <WiFi.h>
@@ -221,39 +222,39 @@ void draw() {
   char line[48];
   switch (step) {
     case Step::Scan:
-      ui::text("Looking for networks", ui::cx(), ui::cy(), &fonts::DejaVu24);
+      ui::text(tr(LOOKING_FOR_NETWORKS), ui::cx(), ui::cy(), &fonts::DejaVu24);
       break;
     case Step::Connect:
-      ui::text("Connecting to", ui::cx(), ui::cy() - 20, &fonts::DejaVu24);
+      ui::text(tr(CONNECTING_TO), ui::cx(), ui::cy() - 20, &fonts::DejaVu24);
       ui::text(net::networks().items[0].ssid, ui::cx(), ui::cy() + 20, &fonts::DejaVu24, ui::kGreen);
       break;
     case Step::Lan:
-      qr("Open on phone", lanUrl, lanUrl);
+      qr(tr(OPEN_ON_PHONE), lanUrl, lanUrl);
       ui::text(net::networks().items[0].ssid, ui::cx(), 388, &fonts::DejaVu18, ui::kGrey);
-      ui::hints(ui::kHintsY, "cancel", "hotspot");
+      ui::hints(ui::kHintsY, tr(CANCEL), tr(HOTSPOT));
       return;
     case Step::Join:
       snprintf(line, sizeof(line), "WIFI:T:WPA;S:%s;P:%s;;", apName, apPass);
-      qr("1. Join with phone", line, apName);
-      snprintf(line, sizeof(line), "password %s", apPass);
+      qr(tr(JOIN_WITH_PHONE), line, apName);
+      snprintf(line, sizeof(line), tr(FMT_PASSWORD), apPass);
       ui::text(line, ui::cx(), 388, &fonts::DejaVu18, ui::kGrey);
       break;
     case Step::Open:
-      qr("2. Open the page", kUrl, kUrl);
+      qr(tr(OPEN_THE_PAGE), kUrl, kUrl);
       break;
     case Step::Saved:
     case Step::Sync:
-      ui::text("Time sync", ui::cx(), ui::cy() - 30, &fonts::DejaVu24, ui::kGreen);
-      ui::text(net::busy() || step == Step::Saved ? "connecting" : net::syncText(), ui::cx(), ui::cy() + 20,
+      ui::text(tr(TIME_SYNC), ui::cx(), ui::cy() - 30, &fonts::DejaVu24, ui::kGreen);
+      ui::text(net::busy() || step == Step::Saved ? tr(SYNC_CONNECTING) : net::syncText(), ui::cx(), ui::cy() + 20,
                &fonts::DejaVu24);
-      if (!net::busy() && step == Step::Sync) ui::hints(ui::kHintsY, nullptr, "done");
+      if (!net::busy() && step == Step::Sync) ui::hints(ui::kHintsY, nullptr, tr(DONE));
       return;
     case Step::Failed:
-      ui::text("Wi-Fi start failed", ui::cx(), ui::cy(), &fonts::DejaVu24, ui::kRed);
-      ui::hints(ui::kHintsY, nullptr, "done");
+      ui::text(tr(WIFI_START_FAILED), ui::cx(), ui::cy(), &fonts::DejaVu24, ui::kRed);
+      ui::hints(ui::kHintsY, nullptr, tr(DONE));
       return;
   }
-  ui::hints(ui::kHintsY, "cancel", nullptr);
+  ui::hints(ui::kHintsY, tr(CANCEL), nullptr);
 }
 
 }  // namespace wifisetup

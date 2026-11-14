@@ -1,11 +1,16 @@
 #include "Ui.h"
 
+#include <I18n.h>
 #include <Logging.h>
+#include <Power.h>
 
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
 #include <tuple>
+
+#include "OpenSans16.h"
 
 namespace ui {
 
@@ -84,16 +89,52 @@ void pageDots(int page, int count) {
   }
 }
 
+const char* const* onOffLabels() {
+  static const char* const l[] = {tr(OFF), tr(ON)};
+  return l;
+}
+
+void battery(int x, int y) {
+  constexpr int kW = 30, kH = 14, kTipW = 3, kTipH = 6, kGap = 6;
+  const int level = std::clamp(board::batteryLevel(), 0, 100);
+  const uint16_t fill = level <= 10 ? kRed : (level <= 20 ? kAmber : TFT_WHITE);
+  char line[8];
+  snprintf(line, sizeof(line), "%d%%", level);
+  sprite.setFont(&fonts::DejaVu12);
+  const int left = x - (kW + kTipW + kGap + sprite.textWidth(line)) / 2, top = y - kH / 2;
+  sprite.drawRoundRect(left, top, kW, kH, 3, kGrey);
+  sprite.fillRect(left + kW, y - kTipH / 2, kTipW, kTipH, kGrey);
+  sprite.fillRect(left + 2, top + 2, (kW - 4) * level / 100, kH - 4, fill);
+  if (board::onUsb()) {
+    const int bx = left + kW / 2;
+    sprite.fillTriangle(bx + 2, top - 1, bx - 5, y + 1, bx, y + 1, kDark);
+    sprite.fillTriangle(bx - 2, top + kH + 1, bx + 5, y - 1, bx, y - 1, kDark);
+    sprite.fillTriangle(bx + 1, top + 1, bx - 3, y, bx, y, kAmber);
+    sprite.fillTriangle(bx - 1, top + kH - 1, bx + 3, y, bx, y, kAmber);
+  }
+  text(line, left + kW + kTipW + kGap, y, &fonts::DejaVu12, kGrey, middle_left);
+}
+
+void banner(const char* s, int y, uint16_t color) {
+  constexpr int kPadX = 24, kPadY = 12, kRadius = 14;
+  sprite.setFont(&fonts::DejaVu40);
+  const int w = sprite.textWidth(s) + 2 * kPadX, h = sprite.fontHeight() + 2 * kPadY;
+  const int x = cx() - w / 2, top = y - h / 2;
+  sprite.fillRoundRect(x, top, w, h, kRadius, color);
+  sprite.fillRoundRect(x + 3, top + 3, w - 6, h - 6, kRadius - 3, TFT_BLACK);
+  text(s, cx(), y, &fonts::DejaVu40, color);
+}
+
 void hints(int y, const char* blue, const char* green, uint16_t color) {
   constexpr int kDotR = 6, kDotGap = 6, kGap = 24;
-  sprite.setFont(&fonts::DejaVu12);
+  sprite.setFont(&OpenSans16);
   auto width = [](const char* s) { return s ? 2 * kDotR + kDotGap + sprite.textWidth(s) : 0; };
   const int wb = width(blue), wg = width(green);
   int x = cx() - (wb + wg + (blue && green ? kGap : 0)) / 2;
   for (const auto& [label, dot, w] : {std::make_tuple(blue, kBlue, wb), std::make_tuple(green, kGreen, wg)}) {
     if (!label) continue;
     sprite.fillCircle(x + kDotR, y, kDotR, dot);
-    text(label, x + 2 * kDotR + kDotGap, y, &fonts::DejaVu12, color, middle_left);
+    text(label, x + 2 * kDotR + kDotGap, y, &OpenSans16, color, middle_left);
     x += w + kGap;
   }
 }
@@ -132,7 +173,7 @@ void pickerDraw(const Picker& p, const char* green) {
          far == 0 ? &fonts::DejaVu40 : (far == 1 ? &fonts::DejaVu24 : &fonts::DejaVu18),
          far == 0 ? TFT_WHITE : (far == 1 ? kGrey : kFaint));
   }
-  hints(kHintsY, "back", green);
+  hints(kHintsY, tr(BACK), green ? green : tr(NEXT));
 }
 
 int rowsUpdate(Row* rows, int count, const Input& in) {
@@ -161,7 +202,7 @@ void rowsDraw(const char* title, const Row* rows, int count) {
 void confirmDraw(const char* question, const char* yes) {
   clear();
   text(question, cx(), cy() - 20, &fonts::DejaVu24);
-  hints(kHintsY, "no", yes);
+  hints(kHintsY, tr(NO), yes);
 }
 
 }  // namespace ui

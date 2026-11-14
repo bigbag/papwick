@@ -12,6 +12,8 @@ enum class Light : uint8_t { On, Dim, Off };
 void setBrightness(uint8_t level);
 void setLight(Light next);
 Light light();
+// Turns the screen on as an input does, for example for an alarm.
+void wake();
 // Any input turns the screen on. Without input, the screen dims after offMs / 2 and goes off after offMs.
 // offMs 0 keeps the screen on. Returns true when the input only woke the screen.
 bool updateLight(const Input& in, uint32_t offMs);
@@ -22,5 +24,7 @@ int batteryLevel();
 void updateChargeLed();
 // Cuts the power. Call it only on battery: with USB, the M5PM1 cuts only the display. Restarts if the cut fails.
 void powerOff();
+// Puts the BMI270 into suspend mode. M5.begin() turns on its accelerometer and gyroscope.
+void imuOff();
 
 }  // namespace board

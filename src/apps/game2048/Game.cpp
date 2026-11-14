@@ -2,6 +2,7 @@
 
 #include <BoardSupport.h>
 #include <Game2048.h>
+#include <I18n.h>
 #include <Logging.h>
 #include <Preferences.h>
 #include <esp_random.h>
@@ -17,9 +18,7 @@ constexpr int kCell = 62, kGap = 8;
 constexpr int kBoard = g2048::kSize * kCell + (g2048::kSize + 1) * kGap;
 constexpr int kTop = 95;
 
-constexpr const char* kOnOff[] = {"Off", "On"};
-constexpr const char* kThemes[] = {"Soft", "Bright"};
-constexpr uint8_t kThemeCount = sizeof(kThemes) / sizeof(*kThemes);
+constexpr uint8_t kThemeCount = 2;
 
 struct GameSettings {
   uint8_t version = 1;
@@ -67,7 +66,7 @@ TileStyle tileStyle(uint8_t exponent, uint8_t theme) {
 class Game : public App {
  public:
   const AppInfo& info() const override {
-    static const AppInfo i = {"g2048", "2048", lgfx::color565(237, 224, 200), "2048"};
+    static const AppInfo i = {"g2048", "2048", lgfx::color565(237, 224, 200), icon::tiles};
     return i;
   }
 
@@ -125,17 +124,16 @@ class Game : public App {
 
   void draw() override {
     if (askNew_) {
-      ui::confirmDraw("New game?", "new game");
+      ui::confirmDraw(tr(NEW_GAME_Q), tr(NEW_GAME));
       return;
     }
     ui::clear();
     char line[40];
-    snprintf(line, sizeof(line), "%lu   best %lu", static_cast<unsigned long>(board_.score),
+    snprintf(line, sizeof(line), tr(FMT_SCORE), static_cast<unsigned long>(board_.score),
              static_cast<unsigned long>(board_.best));
     ui::text(line, ui::cx(), 62, &fonts::DejaVu18);
     auto& c = ui::canvas();
     const int x0 = ui::cx() - kBoard / 2;
-    c.fillRoundRect(x0, kTop, kBoard, kBoard, 10, lgfx::color565(120, 110, 100));
     for (int r = 0; r < g2048::kSize; ++r) {
       for (int col = 0; col < g2048::kSize; ++col) {
         const uint8_t e = board_.cells[r][col];
@@ -150,17 +148,18 @@ class Game : public App {
       }
     }
     if (!g2048::canMove(board_)) {
-      ui::text("Game over", ui::cx(), kTop + kBoard / 2, &fonts::DejaVu40, ui::kRed);
+      ui::banner(tr(GAME_OVER), kTop + kBoard / 2, ui::kRed);
     } else if (winBanner_) {
-      ui::text("2048!", ui::cx(), kTop + kBoard / 2, &fonts::DejaVu56, ui::kAmber);
+      ui::banner("2048!", kTop + kBoard / 2, ui::kAmber);
     }
-    ui::hints(410, "back", "new game");
+    ui::hints(410, tr(BACK), tr(NEW_GAME));
   }
 
   ui::Row* settings(int& count) override {
-    static ui::Row rows[] = {{"Sound", kOnOff, 2, reinterpret_cast<uint8_t*>(&settings_.sound)},
-                             {"Vibration", kOnOff, 2, reinterpret_cast<uint8_t*>(&settings_.vibration)},
-                             {"Theme", kThemes, kThemeCount, &settings_.theme}};
+    static const char* const themes[kThemeCount] = {tr(SOFT), tr(BRIGHT)};
+    static ui::Row rows[] = {{tr(SOUND), ui::onOffLabels(), 2, reinterpret_cast<uint8_t*>(&settings_.sound)},
+                             {tr(VIBRATION), ui::onOffLabels(), 2, reinterpret_cast<uint8_t*>(&settings_.vibration)},
+                             {tr(THEME), themes, kThemeCount, &settings_.theme}};
     count = sizeof(rows) / sizeof(*rows);
     return rows;
   }

@@ -42,19 +42,27 @@ Near the bottom edge, a touch lands lower than the finger aims. Thus the hit are
 
 ## Home screen
 
-The home screen shows one app at a time, with the clock, the battery level and page dots. Swipe left or right to change the app. Tap the icon or push green to open it. Settings is the last entry.
+The home screen shows one app at a time, with the clock, the battery icon and page dots. The battery icon shows the level. A bolt shows USB power. The fill is amber at 20 % or less and red at 10 % or less. Swipe left or right to change the app. Tap the icon or push green to open it. Settings is the last entry.
 
 ## Settings
 
-Settings has five pages. Swipe left or right to change the page. Tap a row to change it.
+Settings has a page for each group. Swipe left or right to change the page. Tap a row to change it.
 
 - Device: brightness, sleep (30 s, 1 min, 2 min, 5 min, never), sound, vibration, units (metric or imperial)
 - Time: zone, set time, sync now
 - Wi-Fi: add network, and the saved networks. Tap a network to forget it
-- Apps: one row for each app. The app page shows the app settings, Clear data and the number of saved NVS entries
-- About: build date, battery, free RAM, reset all
+- Apps: one row for each app, five apps on each page. The app page shows the app settings, Clear data and the number of saved NVS entries
+- About: firmware version, build date, battery, free RAM, reset all
 
-The screen dims at half the sleep time.
+## Power
+
+- The screen dims at half the sleep time.
+- When a frame has no changes, the main loop waits 10 ms. During the wait, the idle task stops the CPU clock.
+- While the screen is off, the CPU runs at 80 MHz instead of 240 MHz. A lower clock stops the PLL, and then USB, Wi-Fi and I2S stop.
+- The speaker amplifier and the codec DAC are on only during a tone and for 3 s after it. With the sound off, they stay off.
+- With the vibration off, the motor gets no power.
+- No app uses the IMU. The shell puts it into suspend mode at start-up.
+- The AMOLED uses power only for lit pixels. Use dark backgrounds.
 
 ## Wi-Fi
 
@@ -79,16 +87,17 @@ Security: the device has no flash encryption. A person with the device and a USB
 
 ## Software
 
-`src/main.cpp` lists the apps and starts the shell. All apps compile into one firmware image.
+`src/main.cpp` lists the apps and starts the shell. All apps compile into one firmware image. `[papwick] version` in `platformio.ini` sets the firmware version. The log shows the version and the reset reason at start-up.
 
 The shell loop reads the input, controls the light and the red button, and gives the input to the current app. It draws the app when the app is dirty, and it calls `animate()` every 50 ms.
 
 An app implements `App` in `src/shell/Shell.h`:
 
-- `info()`: the id (also the NVS namespace), name, icon color and icon text
+- `info()`: the id (also the NVS namespace), name, icon color and pictogram. The pictograms are in `lib/Ui/src/Icons.cpp` and use one stroke width
 - `boot()`: loads the saved data once at start-up
 - `start()`, `stop()`: open and leave the app. `stop()` saves the state
 - `update()`, `draw()`, `animate()`: input, full frame and small animation
+- `background()`: runs in each loop while another app is open, for example for a timer
 - `keepAwake()`: true keeps the screen on, for example during a workout
 - `settings()`, `settingsChanged()`: the setting rows for Settings > Apps
 - `clearData()`: clears the app data
@@ -98,6 +107,24 @@ Rules for apps:
 - Use the one full-screen sprite of `lib/Ui`. Do not make a second one.
 - Do not call `M5.Speaker.begin()` or `M5.Mic.begin()`. Use `board::micBegin()` and `board::micEnd()`.
 - Do not use the red button. The shell owns it.
+- Get each user interface text from `tr(KEY)` of `lib/I18n`. Do not write texts in the code.
+- Call `tr()` at run time. Do not call it in a static initializer. Fill option lists in a function-local static.
+
+## Texts
+
+`lib/I18n/src/I18n.h` holds one list of keys with the English texts. `tr(KEY)` returns the text of the current language. Only English exists now. The `STR_` prefix of the keys stops a clash with Arduino macros such as `LOW` and `DEC`.
+
+To add a text, add a line to the list. Keys that start with `FMT_` are printf formats. The Wi-Fi form page and the serial log stay in English.
+
+The Workout app does not use `tr()` yet.
+
+The DejaVu fonts hold only Latin characters. The button hints use Open Sans 16 with Latin and Cyrillic characters. `scripts/make_font.py` converts a TTF font into a LovyanGFX font header, for example:
+
+```bash
+python3 scripts/make_font.py /usr/share/fonts/TTF/OpenSans-Regular.ttf 16 OpenSans16 lib/Ui/src/OpenSans16.h
+```
+
+The script needs Pillow. A language with other characters needs such fonts for all texts.
 
 ## Storage
 
@@ -105,6 +132,6 @@ The data is in NVS (`Preferences`):
 
 - `sys`: device settings
 - `wifi`: saved networks
-- `fit`, `g2048`: app data, one namespace for each app id
+- `fit`, `g2048`, `pomodoro`, `clock`, `connect4`, `lights`, `sokoban`: app data, one namespace for each app id
 
 Each saved struct has a version. The firmware ignores a struct of an unknown version and uses the defaults. Reset all clears all namespaces and restarts the device.

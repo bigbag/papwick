@@ -109,5 +109,5 @@ The firmware keeps UTC in the RX8130CE. When the RTC has no valid date, `M5.Rtc.
 - The M5PM1 click events (register 0x42) do not report a double click when `DOUBLE_OFF_DIS` is set. M5Unified uses these events for `M5.BtnPWR`, so the firmware does not use `M5.BtnPWR`.
 - The press that powers the device on stays in bit 7 of register 0x48. `board::beginInput()` reads the register once to clear it.
 - With USB, `M5.Power.powerOff()` cuts the display power, but the ESP32 continues to run. Thus the firmware powers off only on battery. `M5.Power.getVBUSVoltage()` reads about 4850 mV with USB.
-- The LED next to the USB port is the M5PM1 LED_EN pin. `M5.Power.M5pm1.setLedEnLevel(false)` turns it off. Verified on the device. The app uses it as a charge LED.
+- The LED next to the USB port is the M5PM1 LED_EN pin. `M5.Power.M5pm1.setLedEnLevel(false)` turns it off. Verified on the device. The firmware uses it as a charge LED.
 - After a cold power-on, the display can stay black while sound and buttons work. The M5IOE1 that powers the panel starts after the display init. A warm reset always shows the display. `board::begin()` restarts the ESP32 once after a power-on reset.

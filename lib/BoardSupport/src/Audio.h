@@ -14,8 +14,9 @@ void vibrate(uint16_t onMs, uint16_t offMs = 0, uint8_t pulses = 1);
 void updateAudio();
 void stopAudio();
 
-// The speaker and the microphone share the ES8311 codec and the I2S clocks. micBegin() stops the speaker,
-// and micEnd() starts it again. Tones stay muted while the microphone runs.
+// The speaker starts for a tone and ends after 3 s of silence. Volume 0 keeps it off.
+// The speaker and the microphone share the ES8311 codec and the I2S clocks. micBegin() stops the speaker.
+// Tones stay muted while the microphone runs.
 bool micBegin();
 // Records 16 ms of sound and returns the peak level 0..32767, or -1 when the microphone is off.
 int micLevel();

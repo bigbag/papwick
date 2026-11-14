@@ -1,0 +1,11 @@
+{
+  "name": "SokobanCore",
+  "version": "1.0.0",
+  "description": "Sokoban rules and levels without hardware dependencies",
+  "frameworks": ["arduino", "espidf"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src"
+  }
+}

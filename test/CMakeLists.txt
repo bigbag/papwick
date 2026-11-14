@@ -15,6 +15,11 @@ include_directories(
   ${PROJECT_ROOT}/lib/FitnessCore/src
   ${PROJECT_ROOT}/lib/Game2048Core/src
   ${PROJECT_ROOT}/lib/SystemCore/src
+  ${PROJECT_ROOT}/lib/LightsOutCore/src
+  ${PROJECT_ROOT}/lib/SokobanCore/src
+  ${PROJECT_ROOT}/lib/PomodoroCore/src
+  ${PROJECT_ROOT}/lib/Connect4Core/src
+  ${PROJECT_ROOT}/lib/I18n/src
 )
 
 file(GLOB FITNESS_CORE_SRC ${PROJECT_ROOT}/lib/FitnessCore/src/*.cpp)
@@ -28,3 +33,15 @@ target_compile_options(Game2048Test PRIVATE -Wall -Wextra -Werror)
 
 add_executable(SystemCoreTest unit/SystemCoreTest.cpp ${SYSTEM_CORE_SRC})
 target_compile_options(SystemCoreTest PRIVATE -Wall -Wextra -Werror)
+
+foreach(name LightsOut Sokoban Connect4)
+  file(GLOB ${name}_SRC ${PROJECT_ROOT}/lib/${name}Core/src/*.cpp)
+  add_executable(${name}Test unit/${name}Test.cpp ${${name}_SRC})
+  target_compile_options(${name}Test PRIVATE -Wall -Wextra -Werror)
+endforeach()
+
+add_executable(I18nTest unit/I18nTest.cpp ${PROJECT_ROOT}/lib/I18n/src/I18n.cpp)
+target_compile_options(I18nTest PRIVATE -Wall -Wextra -Werror)
+
+add_executable(PomodoroTest unit/PomodoroTest.cpp)
+target_compile_options(PomodoroTest PRIVATE -Wall -Wextra -Werror)

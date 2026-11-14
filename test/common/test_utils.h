@@ -23,6 +23,21 @@ class TestRunner {
     return condition;
   }
 
+  bool expectFalse(bool condition, const std::string& testName) { return expectTrue(!condition, testName); }
+
+  template <typename T, typename U>
+  bool expectEq(T expected, U actual, const std::string& testName) {
+    const bool ok = expected == actual;
+    if (!ok) std::cout << "  expected " << +expected << ", actual " << +actual << "\n";
+    return expectTrue(ok, testName);
+  }
+
+  bool expectEqual(const std::string& expected, const std::string& actual, const std::string& testName) {
+    const bool ok = expected == actual;
+    if (!ok) std::cout << "  expected '" << expected << "', actual '" << actual << "'\n";
+    return expectTrue(ok, testName);
+  }
+
   bool expectNear(double expected, double actual, double tolerance, const std::string& testName) {
     const bool ok = std::fabs(expected - actual) <= tolerance;
     if (!ok) std::cout << "  expected " << expected << ", actual " << actual << "\n";

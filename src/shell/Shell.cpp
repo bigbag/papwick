@@ -1,6 +1,7 @@
 #include "Shell.h"
 
 #include <BoardSupport.h>
+#include <I18n.h>
 #include <Logging.h>
 #include <Preferences.h>
 
@@ -9,7 +10,7 @@
 namespace {
 
 constexpr const char* TAG = "SHELL";
-constexpr uint32_t kFrameMs = 50;
+constexpr uint32_t kFrameMs = 50, kIdleMs = 10;
 constexpr uint32_t kResyncSec = 7 * 24 * 3600;
 constexpr int kSyncMinBattery = 20;
 
@@ -18,10 +19,20 @@ sys::Device dev;
 App* const* appList = nullptr;
 int appCount = 0;
 App* current = nullptr;
-bool powerMenu = false;
+// The power question has its own redraw flag, so a background app cannot redraw it in each loop.
+bool powerMenu = false, menuDirty = false;
 uint32_t lastDrawMs = 0;
 
-const char* powerQuestion() { return board::onUsb() ? "Screen off? (USB)" : "Power off?"; }
+const char* resetReason() {
+  static const char* const names[] = {
+      "unknown",       "power-on", "external",     "software",  "panic", "interrupt watchdog",
+      "task watchdog", "watchdog", "deep sleep",   "brownout",  "SDIO",  "USB",
+      "JTAG",          "eFuse",    "power glitch", "CPU lockup"};
+  const unsigned r = esp_reset_reason();
+  return r < sizeof(names) / sizeof(*names) ? names[r] : "unknown";
+}
+
+const char* powerQuestion() { return board::onUsb() ? tr(SCREEN_OFF_Q) : tr(POWER_OFF_Q); }
 
 void powerOff() {
   powerMenu = false;
@@ -34,7 +45,7 @@ void powerOff() {
     return;
   }
   ui::clear();
-  ui::text("Power off", ui::cx(), ui::cy(), &fonts::DejaVu24, ui::kGrey);
+  ui::text(tr(POWER_OFF), ui::cx(), ui::cy(), &fonts::DejaVu24, ui::kGrey);
   ui::push();
   delay(500);
   board::powerOff();
@@ -62,12 +73,14 @@ void begin(App* const* apps, int count) {
   appList = apps;
   appCount = count;
   board::begin();
+  board::imuOff();
   // On battery no serial host can connect, so the wait only delays the first frame.
   if (board::onUsb()) board::waitForSerial(1500);
+  LOG_INF(TAG, "Papwick %s, reset: %s", PAPWICK_VERSION, resetReason());
   LOG_INF(TAG, "Board %d, display %dx%d, PSRAM free %u", static_cast<int>(M5.getBoard()), M5.Display.width(),
           M5.Display.height(), ESP.getFreePsram());
   if (!ui::begin()) {
-    M5.Display.drawString("Out of memory", 160, 230);
+    M5.Display.drawString(tr(OUT_OF_MEMORY), 160, 230);
     while (true) delay(1000);
   }
   if (!prefs.begin("sys", false)) LOG_ERR(TAG, "NVS open failed");
@@ -93,11 +106,10 @@ void loop() {
   const ui::Input in = board::poll();
   const uint32_t offMs = current->keepAwake() || net::busy() ? 0 : sys::kSleepSec[dev.sleep] * 1000u;
   const bool wakeOnly = board::updateLight(in, offMs);
-  if (wakeOnly) current->dirty = true;
+  if (wakeOnly) current->dirty = menuDirty = true;
   if (!wakeOnly) {
     if (in.redDouble) {
-      powerMenu = true;
-      current->dirty = true;
+      powerMenu = menuDirty = true;
     } else if (powerMenu) {
       if (in.green) {
         powerOff();
@@ -115,6 +127,7 @@ void loop() {
       current->update(in);
     }
   }
+  for (int i = 0; i < appCount; ++i) appList[i]->background();
   board::updateAudio();
   board::updateChargeLed();
   net::updateSync();
@@ -122,18 +135,22 @@ void loop() {
   const uint32_t ms = millis();
   if (board::light() == board::Light::Off) {
     delay(20);
-  } else if (current->dirty) {
-    current->dirty = false;
+  } else if (powerMenu ? menuDirty : current->dirty) {
     lastDrawMs = ms;
     if (powerMenu) {
-      ui::confirmDraw(powerQuestion(), "yes");
+      menuDirty = false;
+      ui::confirmDraw(powerQuestion(), tr(YES));
     } else {
+      current->dirty = false;
       current->draw();
     }
     ui::push();
   } else if (ms - lastDrawMs >= kFrameMs) {
     lastDrawMs = ms;
     if (!powerMenu) current->animate();
+  } else {
+    // The idle task stops the CPU clock until the next tick. A busy loop keeps the CPU at full power.
+    delay(kIdleMs);
   }
 }
 

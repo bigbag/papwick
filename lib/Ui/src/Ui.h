@@ -56,6 +56,11 @@ void edgeArc(float from, float to, uint16_t color);
 void progressRing(float fraction, uint16_t color);
 // Draws one dot for each page at the bottom of the edge ring. The current page is white.
 void pageDots(int page, int count);
+// The "Off" and "On" option labels.
+const char* const* onOffLabels();
+
+// Draws the battery icon and level centered at x, y. A bolt shows that USB power is present.
+void battery(int x, int y);
 
 // Draws a blue dot with the blue label and a green dot with the green label, centered. A label can be nullptr.
 // The dot colors match the left (blue) and right (green) hardware buttons.
@@ -64,12 +69,16 @@ void hints(int y, const char* blue, const char* green, uint16_t color = kGrey);
 // A swipe up or down moves the wheel by one step for each 56 px. A tap on a neighbor selects it.
 // A held touch above or below the center moves the wheel, faster after each 1.5 s. Returns true on a change.
 bool pickerUpdate(Picker& p, const Input& in);
-void pickerDraw(const Picker& p, const char* green = "next");
+// green nullptr shows "next".
+void pickerDraw(const Picker& p, const char* green = nullptr);
 
 // A tap on a row with options selects the next option. Returns the index of the tapped row, or -1.
 int rowsUpdate(Row* rows, int count, const Input& in);
 // Draws the title and at most kMaxRows rows.
 void rowsDraw(const char* title, const Row* rows, int count);
+
+// Draws a short message on a black panel with a border of the text color, centered at y. Use it over a game board.
+void banner(const char* s, int y, uint16_t color);
 
 // Draws a question. Green answers yes and blue answers no.
 void confirmDraw(const char* question, const char* yes);

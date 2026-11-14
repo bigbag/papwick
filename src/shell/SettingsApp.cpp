@@ -1,4 +1,5 @@
 #include <BoardSupport.h>
+#include <I18n.h>
 #include <Logging.h>
 #include <esp_heap_caps.h>
 #include <nvs.h>
@@ -16,23 +17,38 @@ namespace {
 
 constexpr const char* TAG = "SETTINGS";
 
-constexpr const char* kSleep[] = {"30 s", "1 min", "2 min", "5 min", "Never"};
-constexpr const char* kUnits[] = {"Metric", "Imperial"};
-constexpr const char* kVolume[] = {"Off", "Low", "Med", "High"};
-constexpr const char* kOnOff[] = {"Off", "On"};
-constexpr const char* kLight[] = {"Low", "Med", "High", "Max"};
-static_assert(sizeof(kSleep) / sizeof(*kSleep) == sizeof(sys::kSleepSec) / sizeof(*sys::kSleepSec), "sleep labels");
-static_assert(sizeof(kVolume) / sizeof(*kVolume) == sizeof(sys::kVolumes), "volume labels");
-static_assert(sizeof(kLight) / sizeof(*kLight) == sizeof(sys::kBrightness), "brightness labels");
+// The option lists fill at first use, after start-up, so they take the texts of the current language.
+const char* const* sleepLabels() {
+  static const char* const l[] = {tr(SLEEP_30S), tr(SLEEP_1MIN), tr(SLEEP_2MIN), tr(SLEEP_5MIN), tr(NEVER)};
+  static_assert(sizeof(l) / sizeof(*l) == sizeof(sys::kSleepSec) / sizeof(*sys::kSleepSec), "sleep labels");
+  return l;
+}
+
+const char* const* unitLabels() {
+  static const char* const l[] = {tr(METRIC), tr(IMPERIAL)};
+  return l;
+}
+
+const char* const* volumeLabels() {
+  static const char* const l[] = {tr(OFF), tr(LOW), tr(MEDIUM), tr(HIGH)};
+  static_assert(sizeof(l) / sizeof(*l) == sizeof(sys::kVolumes), "volume labels");
+  return l;
+}
+
+const char* const* lightLabels() {
+  static const char* const l[] = {tr(LOW), tr(MEDIUM), tr(HIGH), tr(MAX)};
+  static_assert(sizeof(l) / sizeof(*l) == sizeof(sys::kBrightness), "brightness labels");
+  return l;
+}
 
 enum Page : uint8_t { DevicePage, TimePage, WifiPage, AppsPage, AboutPage, kPageCount };
-constexpr const char* kPageNames[] = {"Device", "Time", "Wi-Fi", "Apps", "About"};
+constexpr StrId kPageNames[] = {StrId::STR_DEVICE, StrId::STR_TIME, StrId::STR_WIFI, StrId::STR_APPS, StrId::STR_ABOUT};
 
 enum class Mode : uint8_t { Pages, AppPage, TimeZone, SetTime, WifiSetup, Confirm };
 enum class Ask : uint8_t { Forget, ClearData, ResetAll };
-constexpr const char* kQuestions[] = {"Forget network?", "Clear app data?", "Reset all data?"};
+constexpr StrId kQuestions[] = {StrId::STR_FORGET_Q, StrId::STR_CLEAR_DATA_Q, StrId::STR_RESET_ALL_Q};
 
-constexpr const char* kTimeLabels[] = {"Hour", "Minute", "Day", "Month", "Year"};
+constexpr StrId kTimeLabels[] = {StrId::STR_HOUR, StrId::STR_MINUTE, StrId::STR_DAY, StrId::STR_MONTH, StrId::STR_YEAR};
 constexpr int kTimeSteps = 5;
 
 size_t usedEntries(const char* ns) {
@@ -52,13 +68,13 @@ App& appAt(int i) {
 class Settings : public App {
  public:
   const AppInfo& info() const override {
-    static const AppInfo i = {"settings", "Settings", ui::kGrey, "SET"};
+    static const AppInfo i = {"settings", tr(SETTINGS), ui::kGrey, icon::gear};
     return i;
   }
 
   void start() override {
     mode_ = Mode::Pages;
-    page_ = DevicePage;
+    slot_ = DevicePage;
   }
 
   void stop() override {
@@ -69,7 +85,7 @@ class Settings : public App {
 
   void showApp(int i) {
     app_ = i;
-    page_ = AppsPage;
+    slot_ = AppsPage + i / ui::kMaxRows;
     mode_ = Mode::AppPage;
     dirty = true;
   }
@@ -104,9 +120,9 @@ class Settings : public App {
         ui::clear();
         ui::Row rows[ui::kMaxRows];
         const int n = pageRows(rows);
-        ui::rowsDraw(kPageNames[page_], rows, n);
-        ui::pageDots(page_, kPageCount);
-        ui::hints(ui::kHintsY, "back", nullptr);
+        ui::rowsDraw(title(), rows, n);
+        ui::pageDots(slot_, slotCount());
+        ui::hints(ui::kHintsY, tr(BACK), nullptr);
         break;
       }
       case Mode::AppPage: {
@@ -114,7 +130,7 @@ class Settings : public App {
         ui::Row rows[ui::kMaxRows];
         const int n = appRows(rows);
         ui::rowsDraw(appAt(app_).info().name, rows, n);
-        ui::hints(ui::kHintsY, "back", nullptr);
+        ui::hints(ui::kHintsY, tr(BACK), nullptr);
         break;
       }
       case Mode::TimeZone:
@@ -126,7 +142,7 @@ class Settings : public App {
         wifisetup::draw();
         break;
       case Mode::Confirm:
-        ui::confirmDraw(kQuestions[static_cast<int>(ask_)], "yes");
+        ui::confirmDraw(i18n::get(kQuestions[static_cast<int>(ask_)]), tr(YES));
         break;
     }
   }
@@ -142,15 +158,37 @@ class Settings : public App {
     show(Mode::Confirm);
   }
 
+  // The apps use as many pages as necessary. slot_ counts all pages from 0.
+  static int appPages() {
+    int n;
+    shell::apps(n);
+    return std::max(1, (n + ui::kMaxRows - 1) / ui::kMaxRows);
+  }
+
+  static int slotCount() { return kPageCount - 1 + appPages(); }
+
+  Page page() const {
+    if (slot_ < AppsPage) return static_cast<Page>(slot_);
+    return slot_ < AppsPage + appPages() ? AppsPage : AboutPage;
+  }
+
+  int firstApp() const { return (slot_ - AppsPage) * ui::kMaxRows; }
+
+  const char* title() {
+    if (page() != AppsPage || appPages() == 1) return i18n::get(kPageNames[page()]);
+    snprintf(title_, sizeof(title_), tr(FMT_APPS_PAGE), slot_ - AppsPage + 1, appPages());
+    return title_;
+  }
+
   int pageRows(ui::Row* rows) {
     sys::Device& d = shell::device();
-    switch (page_) {
+    switch (page()) {
       case DevicePage:
-        rows[0] = {"Brightness", kLight, 4, &d.brightness};
-        rows[1] = {"Sleep", kSleep, 5, &d.sleep};
-        rows[2] = {"Sound", kVolume, 4, &d.volume};
-        rows[3] = {"Vibration", kOnOff, 2, reinterpret_cast<uint8_t*>(&d.vibration)};
-        rows[4] = {"Units", kUnits, 2, &d.units};
+        rows[0] = {tr(BRIGHTNESS), lightLabels(), 4, &d.brightness};
+        rows[1] = {tr(SLEEP), sleepLabels(), 5, &d.sleep};
+        rows[2] = {tr(SOUND), volumeLabels(), 4, &d.volume};
+        rows[3] = {tr(VIBRATION), ui::onOffLabels(), 2, reinterpret_cast<uint8_t*>(&d.vibration)};
+        rows[4] = {tr(UNITS), unitLabels(), 2, &d.units};
         return 5;
       case TimePage: {
         const time_t now = time(nullptr);
@@ -158,38 +196,40 @@ class Settings : public App {
         localtime_r(&now, &local);
         strftime(clock_, sizeof(clock_), "%H:%M", &local);
         sys::tzLabel(sys::kZones[d.zone], tz_, sizeof(tz_));
-        rows[0] = {"Zone", nullptr, 0, nullptr, tz_};
-        rows[1] = {"Set time", nullptr, 0, nullptr, clock_};
-        rows[2] = {"Sync now", nullptr, 0, nullptr,
+        rows[0] = {tr(ZONE), nullptr, 0, nullptr, tz_};
+        rows[1] = {tr(SET_TIME), nullptr, 0, nullptr, clock_};
+        rows[2] = {tr(SYNC_NOW), nullptr, 0, nullptr,
                    net::syncState() == net::Sync::Idle ? syncedText() : net::syncText()};
         return 3;
       }
       case WifiPage: {
         const sys::NetworkList& l = net::networks();
-        rows[0] = {"Add network", nullptr, 0, nullptr, ">"};
-        for (int i = 0; i < l.count; ++i) rows[i + 1] = {l.items[i].ssid, nullptr, 0, nullptr, "forget"};
+        rows[0] = {tr(ADD_NETWORK), nullptr, 0, nullptr, ">"};
+        for (int i = 0; i < l.count; ++i) rows[i + 1] = {l.items[i].ssid, nullptr, 0, nullptr, tr(FORGET)};
         return l.count + 1;
       }
       case AppsPage: {
         int n;
         App* const* apps = shell::apps(n);
-        for (int i = 0; i < n && i < ui::kMaxRows; ++i) rows[i] = {apps[i]->info().name, nullptr, 0, nullptr, ">"};
-        return n;
+        const int count = std::min(n - firstApp(), ui::kMaxRows);
+        for (int i = 0; i < count; ++i) rows[i] = {apps[firstApp() + i]->info().name, nullptr, 0, nullptr, ">"};
+        return count;
       }
       default:
         snprintf(battery_, sizeof(battery_), "%d%%", board::batteryLevel());
         snprintf(memory_, sizeof(memory_), "%u KB", heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024);
-        rows[0] = {"Version", nullptr, 0, nullptr, __DATE__};
-        rows[1] = {"Battery", nullptr, 0, nullptr, battery_};
-        rows[2] = {"Free RAM", nullptr, 0, nullptr, memory_};
-        rows[3] = {"Reset all", nullptr, 0, nullptr, ">"};
-        return 4;
+        rows[0] = {tr(VERSION), nullptr, 0, nullptr, PAPWICK_VERSION};
+        rows[1] = {tr(BUILT), nullptr, 0, nullptr, __DATE__};
+        rows[2] = {tr(BATTERY), nullptr, 0, nullptr, battery_};
+        rows[3] = {tr(FREE_RAM), nullptr, 0, nullptr, memory_};
+        rows[4] = {tr(RESET_ALL), nullptr, 0, nullptr, ">"};
+        return 5;
     }
   }
 
   const char* syncedText() {
     const time_t at = shell::device().syncedAt;
-    if (at == 0) return "never";
+    if (at == 0) return tr(NOT_SYNCED);
     tm local;
     localtime_r(&at, &local);
     strftime(synced_, sizeof(synced_), "%d.%m %H:%M", &local);
@@ -202,7 +242,7 @@ class Settings : public App {
       return;
     }
     if (in.swipeLeft || in.swipeRight) {
-      page_ = static_cast<Page>((page_ + (in.swipeLeft ? 1 : kPageCount - 1)) % kPageCount);
+      slot_ = (slot_ + (in.swipeLeft ? 1 : slotCount() - 1)) % slotCount();
       dirty = true;
       return;
     }
@@ -210,18 +250,18 @@ class Settings : public App {
     const int i = ui::rowsUpdate(rows, pageRows(rows), in);
     if (i < 0) return;
     dirty = true;
-    switch (page_) {
+    switch (page()) {
       case DevicePage:
         shell::saveDevice();
         shell::applyDevice();
-        if (rows[i].options == kVolume) board::beep(880, 120);
-        if (rows[i].options == kOnOff) board::vibrate(150);
+        if (rows[i].options == volumeLabels()) board::beep(880, 120);
+        if (rows[i].options == ui::onOffLabels()) board::vibrate(150);
         LOG_INF(TAG, "%s: %s", rows[i].label, rows[i].options[*rows[i].value]);
         break;
       case TimePage:
         if (i == 0) {
-          picker_ = {"Time zone", nullptr, static_cast<float>(shell::device().zone), 0, sys::kZoneCount - 1, 1,
-                     0,           zoneName};
+          picker_ = {tr(TIME_ZONE), nullptr, static_cast<float>(shell::device().zone), 0, sys::kZoneCount - 1, 1, 0,
+                     zoneName};
           show(Mode::TimeZone);
         } else if (i == 1) {
           const time_t now = time(nullptr);
@@ -245,10 +285,10 @@ class Settings : public App {
         }
         break;
       case AppsPage:
-        showApp(i);
+        showApp(firstApp() + i);
         break;
       default:
-        if (i == 3) confirm(Ask::ResetAll);
+        if (i == 4) confirm(Ask::ResetAll);
         break;
     }
   }
@@ -259,9 +299,9 @@ class Settings : public App {
     const ui::Row* own = a.settings(n);
     n = std::min(n, ui::kMaxRows - 2);
     for (int i = 0; i < n; ++i) rows[i] = own[i];
-    snprintf(entries_, sizeof(entries_), "%u entries", usedEntries(a.info().id));
-    rows[n] = {"Clear data", nullptr, 0, nullptr, ">"};
-    rows[n + 1] = {"Storage", nullptr, 0, nullptr, entries_};
+    snprintf(entries_, sizeof(entries_), tr(FMT_ENTRIES), usedEntries(a.info().id));
+    rows[n] = {tr(CLEAR_DATA), nullptr, 0, nullptr, ">"};
+    rows[n + 1] = {tr(STORAGE), nullptr, 0, nullptr, entries_};
     return n + 2;
   }
 
@@ -286,8 +326,13 @@ class Settings : public App {
     const int values[] = {time_.tm_hour, time_.tm_min, time_.tm_mday, time_.tm_mon + 1, time_.tm_year + 1900};
     const float mins[] = {0, 0, 1, 1, 2024};
     const float maxs[] = {23, 59, 31, 12, 2099};
-    picker_ = {
-        kTimeLabels[timeStep_], "", static_cast<float>(values[timeStep_]), mins[timeStep_], maxs[timeStep_], 1, 0};
+    picker_ = {i18n::get(kTimeLabels[timeStep_]),
+               "",
+               static_cast<float>(values[timeStep_]),
+               mins[timeStep_],
+               maxs[timeStep_],
+               1,
+               0};
   }
 
   void storeTimePicker() {
@@ -358,13 +403,13 @@ class Settings : public App {
   }
 
   Mode mode_ = Mode::Pages;
-  Page page_ = DevicePage;
+  int slot_ = DevicePage;
   Ask ask_ = Ask::Forget;
   int app_ = 0, network_ = 0, timeStep_ = 0;
   net::Sync shownSync_ = net::Sync::Idle;
   ui::Picker picker_{};
   tm time_{};
-  char tz_[16], clock_[8], synced_[16], battery_[8], memory_[12], entries_[16];
+  char title_[12], tz_[16], clock_[8], synced_[16], battery_[8], memory_[12], entries_[16];
 };
 
 Settings& instance() {

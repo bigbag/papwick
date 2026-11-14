@@ -1,6 +1,7 @@
 #include "Net.h"
 
 #include <BoardSupport.h>
+#include <I18n.h>
 #include <Logging.h>
 #include <Preferences.h>
 
@@ -110,8 +111,9 @@ Sync syncState() { return state; }
 bool busy() { return state == Sync::Connecting || state == Sync::Ntp; }
 
 const char* syncText() {
-  static const char* const names[] = {"", "connecting", "getting time", "done", "failed", "no Wi-Fi"};
-  return names[static_cast<int>(state)];
+  static const StrId names[] = {StrId::STR__COUNT,    StrId::STR_SYNC_CONNECTING, StrId::STR_SYNC_GETTING_TIME,
+                                StrId::STR_SYNC_DONE, StrId::STR_SYNC_FAILED,     StrId::STR_SYNC_NO_WIFI};
+  return i18n::get(names[static_cast<int>(state)]);
 }
 
 }  // namespace net

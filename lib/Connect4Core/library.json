@@ -1,0 +1,11 @@
+{
+  "name": "Connect4Core",
+  "version": "1.0.0",
+  "description": "Connect Four rules and opponent without hardware dependencies",
+  "frameworks": ["arduino", "espidf"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src"
+  }
+}

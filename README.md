@@ -1,6 +1,6 @@
 # Papwick
 
-Papwick is an app platform firmware for the [M5Stack TriviaPOD](https://docs.m5stack.com/en/core/TriviaPOD). It has a home screen, device settings, Wi-Fi time sync and two apps: Workout and 2048.
+Papwick is an app platform firmware for the [M5Stack TriviaPOD](https://docs.m5stack.com/en/core/TriviaPOD). It has a home screen, device settings, Wi-Fi time sync and seven apps: Workout, Pomodoro, Clock, 2048, Four in a Row, Lights Out and Sokoban.
 
 > **Warning:** Papwick replaces the stock Etermax trivia firmware. The stock firmware has no public download. Make a [backup](docs/flashing.md#back-up-the-stock-firmware) before the first write.
 
@@ -9,7 +9,7 @@ This project is **not affiliated with M5Stack or Etermax**. It is a personal pro
 ## Documentation
 
 - **Use:** [Platform](docs/platform.md), [Apps](docs/apps.md)
-- **Install:** [Flashing](docs/flashing.md)
+- **Install:** [Flashing](docs/flashing.md), [Troubleshooting](docs/troubleshooting.md)
 - **Hardware:** [Specifications](docs/triviapod-specifications.md)
 
 ## Supported devices
@@ -23,12 +23,14 @@ This project is **not affiliated with M5Stack or Etermax**. It is a personal pro
 
 ### Platform
 
-- Home screen with one app on each page, the clock and the battery level
+- Home screen with one app on each page, the clock and a battery icon
 - Touch for the content, physical buttons for the flow: blue is back, green is confirm
 - Red button: a click goes home, a double click asks to power off
 - Wheel pickers for numbers, dates and times
 - Settings for brightness, sleep, sound, vibration and units
 - App manager with the app settings and Clear data for each app
+- Power saving: the CPU stops between frames, the speaker is on only for tones, and the CPU runs at 80 MHz while the screen is off
+- All user interface texts come from one list, ready for translations
 
 ### Network and time
 
@@ -39,7 +41,12 @@ This project is **not affiliated with M5Stack or Etermax**. It is a personal pro
 ### Apps
 
 - **Workout:** a 28-day home workout plan with no equipment, animated exercises, a weight log and statistics
+- **Pomodoro:** a focus timer with 25-minute sessions and breaks; the alarm also comes in other apps
+- **Clock:** an analog or digital watch face with the date and the battery level
 - **2048:** the tile game with swipe control and two color themes
+- **Four in a Row:** play against the device on three levels
+- **Lights Out:** turn off all lights on a 5 x 5 grid
+- **Sokoban:** push the boxes onto the targets in 12 levels
 
 ## Installing
 
@@ -109,9 +116,12 @@ The upload resets the chip into download mode through USB. Buttons are not neces
 
 ```bash
 make monitor
+make log LOG=device.log
 ```
 
-The monitor opens the port with DTR and RTS low. A program that raises them can reset the chip into download mode. See [flashing](docs/flashing.md#flash-the-firmware) for the recovery.
+`make log` appends the log to a file and connects again after a reset.
+
+The monitor opens the port with DTR and RTS low. A program that raises them can reset the chip into download mode. See [troubleshooting](docs/troubleshooting.md#the-device-stays-in-download-mode) for the recovery.
 
 Run `make help` for all commands.
 
