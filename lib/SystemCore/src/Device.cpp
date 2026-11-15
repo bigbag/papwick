@@ -32,7 +32,17 @@ bool isValid(const Device& d) {
   uint8_t vibration;
   memcpy(&vibration, &d.vibration, 1);
   return d.version == kDeviceVersion && vibration <= 1 && d.sleep < count(kSleepSec) && d.units <= 1 &&
-         d.volume < count(kVolumes) && d.brightness < count(kBrightness) && d.zone < kZoneCount;
+         d.volume < count(kVolumes) && d.brightness < count(kBrightness) && d.zone < kZoneCount &&
+         terminated(d.name, sizeof(d.name)) && isValidName(d.name);
+}
+
+bool isValidName(const char* s) {
+  const size_t n = strlen(s);
+  if (n >= sizeof(Device::name) || (n > 0 && (s[0] == ' ' || s[n - 1] == ' '))) return false;
+  for (size_t i = 0; i < n; ++i) {
+    if (s[i] < 0x20 || s[i] > 0x7E) return false;
+  }
+  return true;
 }
 
 int daysInMonth(int month, int year) {

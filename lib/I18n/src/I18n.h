@@ -23,6 +23,9 @@
   X(NEXT_LEVEL, "next level") \
   X(HOTSPOT, "hotspot") \
   X(FORGET, "forget") \
+  X(RETRY, "retry") \
+  X(TALK, "talk") \
+  X(STOP, "stop") \
   /* Options */ \
   X(ON, "On") \
   X(OFF, "Off") \
@@ -76,8 +79,8 @@
   X(MONTH, "Month") \
   X(YEAR, "Year") \
   X(ADD_NETWORK, "Add network") \
+  X(NAME, "Name") \
   X(VERSION, "Version") \
-  X(BUILT, "Built") \
   X(BATTERY, "Battery") \
   X(FREE_RAM, "Free RAM") \
   X(RESET_ALL, "Reset all") \
@@ -100,6 +103,7 @@
   X(OPEN_THE_PAGE, "2. Open the page") \
   X(FMT_PASSWORD, "password %s") \
   X(TIME_SYNC, "Time sync") \
+  X(SAVED, "Saved") \
   X(WIFI_START_FAILED, "Wi-Fi start failed") \
   /* Games */ \
   X(NEW_GAME_Q, "New game?") \
@@ -135,6 +139,36 @@
   X(START_BREAK, "start the break") \
   X(START_FOCUS, "start to focus") \
   X(START_MODE, "Start mode") \
+  /* Walkie-talkie */ \
+  X(WALKIE_TALKIE, "Walkie-talkie") \
+  X(NO_WIFI_NETWORK, "No Wi-Fi network") \
+  X(ADD_IN_SETTINGS, "Add one in Settings") \
+  X(CONNECTING, "Connecting") \
+  X(NO_CONNECTION, "No connection") \
+  X(NO_OTHER_DEVICES, "No other devices") \
+  X(SEARCHING, "Searching") \
+  X(SWIPE_TO_SEARCH, "Swipe down to search") \
+  X(TALKING, "Talking") \
+  X(PUSH_TO_TALK, "Push green to talk") \
+  X(PUSH_TO_STOP, "Push green to stop") \
+  X(TAP_TO_CONNECT, "Tap a device to connect") \
+  X(CONFIRM_ON_OTHER, "Confirm on the other device") \
+  X(FMT_CONNECT_Q, "Connect %s?") \
+  X(FMT_FORGET_Q, "Forget %s?") \
+  X(FMT_ROW, "%s (%s)") \
+  X(STATUS_NEW, "new") \
+  X(STATUS_WAITING, "waiting") \
+  X(STATUS_OFFLINE, "offline") \
+  X(WAIT, "Wait") \
+  X(IS_TALKING, "is talking") \
+  X(BUSY, "Busy") \
+  X(REFUSED, "Refused") \
+  X(NO_ANSWER, "No answer") \
+  X(CONNECTED, "Connected") \
+  X(FORGOTTEN, "Forgotten") \
+  X(NOBODY_ONLINE, "No paired device online") \
+  X(LIST_FULL, "The list is full") \
+  X(MIC_ERROR, "Microphone error") \
   /* Clock */ \
   X(CLOCK, "Clock") \
   X(FACE, "Face") \

@@ -15,6 +15,8 @@ struct Input {
   int distance = 0;
   // The blue button is on the left (BtnA, GPIO2). The green button is on the right (BtnB, GPIO1).
   bool blue = false, green = false;
+  // The green button is down now, for push-to-talk.
+  bool greenDown = false;
   // The red power button. A series of more than two clicks counts as a double click.
   bool red = false, redDouble = false;
   bool any() const;

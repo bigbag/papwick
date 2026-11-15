@@ -52,27 +52,28 @@ Settings has a page for each group. Swipe left or right to change the page. Tap 
 - Time: zone, set time, sync now
 - Wi-Fi: add network, and the saved networks. Tap a network to forget it
 - Apps: one row for each app, five apps on each page. The app page shows the app settings, Clear data and the number of saved NVS entries
-- About: firmware version, build date, battery, free RAM, reset all
+- About: device name, firmware version, battery, free RAM, reset all
 
 ## Power
 
 - The screen dims at half the sleep time.
 - When a frame has no changes, the main loop waits 10 ms. During the wait, the idle task halts the CPU until the next interrupt (WAITI).
 - While the screen is off, the CPU runs at 80 MHz instead of 240 MHz. A lower clock stops the PLL, and then USB, Wi-Fi and I2S stop.
-- The speaker amplifier and the codec DAC are on only during a tone and for 3 s after it. With the sound off, they stay off.
+- The speaker amplifier and the codec DAC are on only during a tone or a voice, and for 3 s after it. With the sound off, tones do not turn them on.
 - With the vibration off, the motor gets no power.
 - No app uses the IMU. The shell puts it into suspend mode at start-up.
 - The AMOLED uses power only for lit pixels. Use dark backgrounds.
 
 ## Wi-Fi
 
-The radio is on only for the network setup and the time sync. The device saves up to 4 networks.
+The radio is on only for the network setup, the time sync and while the Walkie-talkie app is open. The device saves up to 4 networks.
 
-To add a network, open Settings > Wi-Fi > Add network:
+To add a network or to set the device name, open Settings > Wi-Fi > Add network or Settings > About > Name:
 
 - When a saved network answers, the device joins it and shows a QR code of its form page, for example `http://192.168.1.23`. Open it on a phone in the same network. Push green to use the hotspot.
 - Else the device starts the hotspot `Papwick-XXXX` with a random 8-digit password, and shows a QR code to join it. The hotspot answers all names with its own address, so the phone opens the form page itself. A second QR code opens `http://192.168.4.1`.
-- On the form page, select a network or type its name, and type the password. The device then connects and syncs the time.
+- On the form page, type the device name, select a network or type its name, and type the password. The device then connects and syncs the time.
+- The device name has up to 15 Latin letters, digits, spaces and signs. The walkie-talkie shows it. An empty name gives `Papwick-XXXX`. "No change" keeps the networks and saves only the name.
 
 A connection tries the saved networks in list order, 15 s each. A network that connects moves to the first position.
 
@@ -114,7 +115,7 @@ Rules for apps:
 
 `lib/I18n/src/I18n.h` holds one list of keys with the English texts. `tr(KEY)` returns the text of the current language. Only English exists now. The `STR_` prefix of the keys stops a clash with Arduino macros such as `LOW` and `DEC`.
 
-To add a text, add a line to the list. Keys that start with `FMT_` are printf formats. The Wi-Fi form page and the serial log stay in English.
+To add a text, add a line to the list. Keys that start with `FMT_` are printf formats. The form page and the serial log stay in English.
 
 The Workout app does not use `tr()` yet.
 

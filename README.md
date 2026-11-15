@@ -1,6 +1,6 @@
 # Papwick
 
-Papwick is an app platform firmware for the [M5Stack TriviaPOD](https://docs.m5stack.com/en/core/TriviaPOD). It has a home screen, device settings, Wi-Fi time sync and seven apps: Workout, Pomodoro, Clock, 2048, Four in a Row, Lights Out and Sokoban.
+Papwick is an app platform firmware for the [M5Stack TriviaPOD](https://docs.m5stack.com/en/core/TriviaPOD). It has a home screen, device settings, Wi-Fi time sync and eight apps: Workout, Pomodoro, Clock, 2048, Four in a Row, Lights Out, Sokoban and Walkie-talkie.
 
 > **Warning:** Papwick replaces the stock Etermax trivia firmware. The stock firmware has no public download. Make a [backup](docs/flashing.md#back-up-the-stock-firmware) before the first write.
 
@@ -47,6 +47,7 @@ This project is **not affiliated with M5Stack or Etermax**. It is a personal pro
 - **Four in a Row:** play against the device on three levels
 - **Lights Out:** turn off all lights on a 5 x 5 grid
 - **Sokoban:** push the boxes onto the targets in 12 levels
+- **Walkie-talkie:** push-to-talk voice between TriviaPODs in the same Wi-Fi network
 
 ## Installing
 

@@ -11,6 +11,7 @@
 #include <cstdio>
 
 #include "Net.h"
+#include "Shell.h"
 
 namespace wifisetup {
 
@@ -21,12 +22,14 @@ constexpr const char* kUrl = "http://192.168.4.1";
 constexpr uint32_t kReplyMs = 1500;
 constexpr int kMaxFound = 16;
 
-enum class Step : uint8_t { Scan, Connect, Lan, Join, Open, Saved, Sync, Failed };
+// Named: the user changed only the name.
+enum class Step : uint8_t { Scan, Connect, Lan, Join, Open, Saved, Named, Sync, Failed };
 
 Step step = Step::Scan;
 board::wifi::Network found[kMaxFound];
 int foundCount = 0;
-char apName[20], apPass[9], lanUrl[32];
+char apPass[9], lanUrl[32];
+const char* apName = "";
 uint32_t savedAt = 0;
 WebServer server(80);
 // Answers all names with the device address. Then the phone sees a captive portal, opens the form page itself and
@@ -76,31 +79,61 @@ constexpr const char* kStyle =
 void sendPage(int code, const String& body) {
   server.send(code, "text/html",
               String("<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>"
-                     "<title>Papwick Wi-Fi</title>") +
-                  kStyle + "<main><h2>Papwick Wi-Fi</h2><div class=card>" + body + "</div></main>");
+                     "<title>Papwick</title>") +
+                  kStyle + "<main><h2>Papwick</h2><div class=card>" + body + "</div></main>");
 }
 
 void handleForm() {
   LOG_INF(TAG, "HTTP form");
-  String options;
+  // The empty option keeps the networks, so a name change alone does not save a network.
+  String options =
+      String("<option value=\"\">") + (net::networks().count > 0 ? "No change" : "Select a network") + "</option>";
   for (int i = 0; i < foundCount; ++i) {
     const String ssid = escape(found[i].ssid);
     options += "<option value=\"" + ssid + "\">" + ssid + (found[i].secured ? "" : " (open)") + "</option>";
   }
-  sendPage(200, "<form method=post action=/save><label>Network</label><select name=s>" + options +
+  sendPage(200, "<form method=post action=/save><label>Device name</label><input name=n maxlength=15 value=\"" +
+                    escape(shell::device().name) + "\" placeholder=\"" + escape(board::wifi::deviceName()) +
+                    "\"><label>Network</label><select name=s>" + options +
                     "</select><label>Other network name</label><input name=o maxlength=32>"
                     "<label>Password</label><input name=p type=password maxlength=64><button>Save</button></form>");
 }
 
 void handleSave() {
+  String name = server.arg("n");
+  name.trim();
+  if (!sys::isValidName(name.c_str())) {
+    sendPage(400,
+             "<p class=err>The device name can have up to 15 Latin letters, digits, spaces and signs.</p>"
+             "<p><a href=/>Back</a></p>");
+    return;
+  }
   const String other = server.arg("o");
   const String ssid = other.length() ? other : server.arg("s");
-  if (!sys::addNetwork(net::networks(), ssid.c_str(), server.arg("p").c_str())) {
+  // The live list changes only after the name is saved.
+  sys::NetworkList list = net::networks();
+  if (ssid.length() && !sys::addNetwork(list, ssid.c_str(), server.arg("p").c_str())) {
     sendPage(400,
              "<p class=err>Check the network name and the password: 8 to 64 characters, or empty for an open "
              "network.</p><p><a href=/>Back</a></p>");
     return;
   }
+  sys::Device& d = shell::device();
+  if (name != d.name) {
+    snprintf(d.name, sizeof(d.name), "%s", name.c_str());
+    // A failed write restores the old name, so a retry with the same name writes again.
+    if (!shell::saveDevice()) {
+      sendPage(500, "<p class=err>The device cannot save the name. Try again.</p><p><a href=/>Back</a></p>");
+      return;
+    }
+    LOG_INF(TAG, "Name %s", shell::deviceName());
+  }
+  if (!ssid.length()) {
+    sendPage(200, "<p>Saved.</p>");
+    step = Step::Named;
+    return;
+  }
+  net::networks() = list;
   net::saveNetworks();
   LOG_INF(TAG, "Saved network %s", ssid.c_str());
   sendPage(200, "<p>Saved. The device connects to the network now.</p>");
@@ -140,8 +173,7 @@ void end() {
 void begin() {
   // A running sync uses the radio that the scan restarts.
   net::cancel();
-  const uint64_t mac = ESP.getEfuseMac();
-  snprintf(apName, sizeof(apName), "Papwick-%04X", static_cast<unsigned>((mac >> 32) & 0xFFFF));
+  apName = board::wifi::deviceName();
   snprintf(apPass, sizeof(apPass), "%08lu", static_cast<unsigned long>(esp_random() % 100000000));
   foundCount = 0;
   step = board::wifi::startScan() ? Step::Scan : Step::Failed;
@@ -155,7 +187,7 @@ void begin() {
 
 bool update(const ui::Input& in, bool& dirty) {
   const Step before = step;
-  const bool ended = step == Step::Failed || (step == Step::Sync && !net::busy());
+  const bool ended = step == Step::Failed || step == Step::Named || (step == Step::Sync && !net::busy());
   if (in.blue || (in.green && ended)) {
     end();
     return false;
@@ -210,6 +242,7 @@ bool update(const ui::Input& in, bool& dirty) {
       }
       break;
     }
+    case Step::Named:
     case Step::Failed:
       break;
   }
@@ -248,6 +281,11 @@ void draw() {
       ui::text(net::busy() || step == Step::Saved ? tr(SYNC_CONNECTING) : net::syncText(), ui::cx(), ui::cy() + 20,
                &fonts::DejaVu24);
       if (!net::busy() && step == Step::Sync) ui::hints(ui::kHintsY, nullptr, tr(DONE));
+      return;
+    case Step::Named:
+      ui::text(tr(SAVED), ui::cx(), ui::cy() - 20, &fonts::DejaVu24, ui::kGreen);
+      ui::text(shell::deviceName(), ui::cx(), ui::cy() + 20, &fonts::DejaVu24);
+      ui::hints(ui::kHintsY, nullptr, tr(DONE));
       return;
     case Step::Failed:
       ui::text(tr(WIFI_START_FAILED), ui::cx(), ui::cy(), &fonts::DejaVu24, ui::kRed);

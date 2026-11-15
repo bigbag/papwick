@@ -2,7 +2,8 @@
 
 #include <Ui.h>
 
-// Adds a Wi-Fi network from a phone. There is no on-screen keyboard: its keys are too small on the round screen.
+// Sets the device name and adds a Wi-Fi network from a phone. There is no on-screen keyboard: its keys are too small
+// on the round screen.
 // When a saved network answers, the device shows a QR code of its form page in that network. Otherwise it starts a
 // hotspot and shows QR codes to join it and to open the form page.
 namespace wifisetup {

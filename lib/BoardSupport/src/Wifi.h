@@ -24,4 +24,9 @@ bool startAp(const char* ssid, const char* password);
 
 void shutdown();
 
+// "Papwick-XXXX" from the MAC address. The hotspot and the walkie-talkie use it.
+const char* deviceName();
+// The modem sleep saves power, but delays and drops broadcast and unicast frames.
+void setPowerSave(bool on);
+
 }  // namespace board::wifi

@@ -16,6 +16,8 @@ constexpr int kSyncMinBattery = 20;
 
 Preferences prefs;
 sys::Device dev;
+// The settings that NVS holds. A failed write returns dev to them.
+sys::Device savedDev;
 App* const* appList = nullptr;
 int appCount = 0;
 App* current = nullptr;
@@ -76,7 +78,7 @@ void begin(App* const* apps, int count) {
   board::imuOff();
   // On battery no serial host can connect, so the wait only delays the first frame.
   if (board::onUsb()) board::waitForSerial(1500);
-  LOG_INF(TAG, "Papwick %s, reset: %s", PAPWICK_VERSION, resetReason());
+  LOG_INF(TAG, "Papwick %s, built %s, reset: %s", PAPWICK_VERSION, __DATE__, resetReason());
   LOG_INF(TAG, "Board %d, display %dx%d, PSRAM free %u", static_cast<int>(M5.getBoard()), M5.Display.width(),
           M5.Display.height(), ESP.getFreePsram());
   if (!ui::begin()) {
@@ -90,6 +92,7 @@ void begin(App* const* apps, int count) {
   } else {
     LOG_INF(TAG, "No valid device settings in NVS");
   }
+  savedDev = dev;
   net::begin();
   for (int i = 0; i < appCount; ++i) appList[i]->boot();
   LOG_INF(TAG, "Device: sleep %u, units %u, volume %u, vibration %u, brightness %u, zone %d min", dev.sleep, dev.units,
@@ -176,9 +179,16 @@ App* const* apps(int& count) {
 
 sys::Device& device() { return dev; }
 
+const char* deviceName() { return dev.name[0] ? dev.name : board::wifi::deviceName(); }
+
 bool saveDevice() {
-  if (prefs.putBytes("device", &dev, sizeof(dev)) == sizeof(dev)) return true;
+  if (prefs.putBytes("device", &dev, sizeof(dev)) == sizeof(dev)) {
+    savedDev = dev;
+    return true;
+  }
   LOG_ERR(TAG, "Save device settings failed");
+  // The screen then shows the settings that the device keeps after a restart, and a retry writes again.
+  dev = savedDev;
   return false;
 }
 

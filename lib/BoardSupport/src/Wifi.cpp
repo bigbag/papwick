@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
 #include <cstring>
 
 namespace board::wifi {
@@ -116,6 +117,16 @@ void shutdown() {
   WiFi.scanDelete();
   if (!WiFi.mode(WIFI_OFF)) LOG_ERR(TAG, "Radio off failed");
   LOG_INF(TAG, "WiFi shut down");
+}
+
+const char* deviceName() {
+  static char name[16] = "";
+  if (!name[0]) snprintf(name, sizeof(name), "Papwick-%04X", static_cast<unsigned>((ESP.getEfuseMac() >> 32) & 0xFFFF));
+  return name;
+}
+
+void setPowerSave(bool on) {
+  if (!WiFi.setSleep(on)) LOG_ERR(TAG, "Power save %d failed", on);
 }
 
 }  // namespace board::wifi

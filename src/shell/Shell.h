@@ -55,7 +55,9 @@ void home();
 void openAppPage(App& app);
 App* const* apps(int& count);
 sys::Device& device();
-// Returns false when the write fails.
+// The name that other devices show: the user name, or "Papwick-XXXX".
+const char* deviceName();
+// Returns false when the write fails. Then device() returns to the last saved settings.
 bool saveDevice();
 // Sends the brightness, volume, vibration and time zone to the hardware.
 void applyDevice();

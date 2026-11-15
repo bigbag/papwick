@@ -18,6 +18,13 @@ void testDevice(TestUtils::TestRunner& r) {
   d = Device{};
   memset(&d.vibration, 2, 1);
   r.expectTrue(!isValid(d), "vibration byte other than 0 or 1 is invalid");
+  r.expectTrue(isValidName("") && isValidName("Kitchen 2") && isValidName("123456789012345"), "valid names");
+  r.expectFalse(isValidName("1234567890123456"), "a name of 16 characters is too long");
+  r.expectFalse(isValidName(" Kitchen") || isValidName("Kitchen "), "spaces at the ends are invalid");
+  r.expectFalse(isValidName("\xD0\x9A\xD1\x83") || isValidName("a\tb"), "non-ASCII and control characters are invalid");
+  d = Device{};
+  memset(d.name, 'x', sizeof(d.name));
+  r.expectFalse(isValid(d), "a name without NUL is invalid");
   r.expectTrue(daysInMonth(2, 2024) == 29 && daysInMonth(2, 2026) == 28 && daysInMonth(2, 2100) == 28 &&
                    daysInMonth(2, 2000) == 29 && daysInMonth(4, 2026) == 30 && daysInMonth(12, 2026) == 31,
                "days in month with leap years");

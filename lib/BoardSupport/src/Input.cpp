@@ -85,6 +85,7 @@ Input poll() {
   }
   in.blue = M5.BtnA.wasPressed();
   in.green = M5.BtnB.wasPressed();
+  in.greenDown = M5.BtnB.isPressed();
   const int clicks = redClicks();
   in.red = clicks == 1;
   in.redDouble = clicks >= 2;

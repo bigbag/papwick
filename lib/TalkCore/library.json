@@ -1,0 +1,11 @@
+{
+  "name": "TalkCore",
+  "version": "1.0.0",
+  "description": "Walkie-talkie packets, peer list and jitter buffer without hardware dependencies",
+  "frameworks": ["arduino", "espidf"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src"
+  }
+}

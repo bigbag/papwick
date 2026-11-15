@@ -219,8 +219,8 @@ class Settings : public App {
       default:
         snprintf(battery_, sizeof(battery_), "%d%%", board::batteryLevel());
         snprintf(memory_, sizeof(memory_), "%u KB", heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024);
-        rows[0] = {tr(VERSION), nullptr, 0, nullptr, PAPWICK_VERSION};
-        rows[1] = {tr(BUILT), nullptr, 0, nullptr, __DATE__};
+        rows[0] = {tr(NAME), nullptr, 0, nullptr, shell::deviceName()};
+        rows[1] = {tr(VERSION), nullptr, 0, nullptr, PAPWICK_VERSION};
         rows[2] = {tr(BATTERY), nullptr, 0, nullptr, battery_};
         rows[3] = {tr(FREE_RAM), nullptr, 0, nullptr, memory_};
         rows[4] = {tr(RESET_ALL), nullptr, 0, nullptr, ">"};
@@ -289,7 +289,12 @@ class Settings : public App {
         showApp(firstApp() + i);
         break;
       default:
-        if (i == 4) confirm(Ask::ResetAll);
+        if (i == 0) {
+          wifisetup::begin();
+          show(Mode::WifiSetup);
+        } else if (i == 4) {
+          confirm(Ask::ResetAll);
+        }
         break;
     }
   }

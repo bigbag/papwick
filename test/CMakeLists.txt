@@ -19,6 +19,7 @@ include_directories(
   ${PROJECT_ROOT}/lib/SokobanCore/src
   ${PROJECT_ROOT}/lib/PomodoroCore/src
   ${PROJECT_ROOT}/lib/Connect4Core/src
+  ${PROJECT_ROOT}/lib/TalkCore/src
   ${PROJECT_ROOT}/lib/I18n/src
 )
 
@@ -34,7 +35,7 @@ target_compile_options(Game2048Test PRIVATE -Wall -Wextra -Werror)
 add_executable(SystemCoreTest unit/SystemCoreTest.cpp ${SYSTEM_CORE_SRC})
 target_compile_options(SystemCoreTest PRIVATE -Wall -Wextra -Werror)
 
-foreach(name LightsOut Sokoban Connect4)
+foreach(name LightsOut Sokoban Connect4 Talk)
   file(GLOB ${name}_SRC ${PROJECT_ROOT}/lib/${name}Core/src/*.cpp)
   add_executable(${name}Test unit/${name}Test.cpp ${${name}_SRC})
   target_compile_options(${name}Test PRIVATE -Wall -Wextra -Werror)

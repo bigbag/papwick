@@ -5,12 +5,13 @@
 #include "apps/lightsout/App.h"
 #include "apps/pomodoro/App.h"
 #include "apps/sokoban/App.h"
+#include "apps/talk/App.h"
 #include "shell/Shell.h"
 
 namespace {
 
-App* const kApps[] = {&fitnessApp(),  &pomodoroApp(),  &clockApp(),  &game2048App(),
-                      &connect4App(), &lightsOutApp(), &sokobanApp()};
+App* const kApps[] = {&fitnessApp(),  &pomodoroApp(),  &clockApp(),   &game2048App(),
+                      &connect4App(), &lightsOutApp(), &sokobanApp(), &talkApp()};
 
 }  // namespace
 

@@ -77,6 +77,14 @@ void crate(int x, int y, uint16_t ink, uint16_t bg) {
   line(x - 22, y + 22, x + 22, y - 22, ink);
 }
 
+void radio(int x, int y, uint16_t ink, uint16_t bg) {
+  auto& c = ui::canvas();
+  line(x - 12, y - 36, x - 12, y - 24, ink);
+  c.fillRoundRect(x - 22, y - 26, 44, 66, 10, ink);
+  c.fillRoundRect(x - 15, y - 17, 30, 17, 4, bg);
+  for (int i = 0; i < 3; ++i) c.fillRoundRect(x - 13, y + 8 + i * 9, 26, 4, 2, bg);
+}
+
 void gear(int x, int y, uint16_t ink, uint16_t bg) {
   constexpr float kPi = 3.14159265f;
   auto& c = ui::canvas();

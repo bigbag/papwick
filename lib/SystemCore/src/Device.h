@@ -5,7 +5,7 @@
 
 namespace sys {
 
-constexpr uint8_t kDeviceVersion = 3;
+constexpr uint8_t kDeviceVersion = 4;
 // Screen-off time in seconds per option. 0 means never.
 constexpr uint16_t kSleepSec[] = {30, 60, 120, 300, 0};
 constexpr uint8_t kVolumes[] = {0, 90, 170, 255};
@@ -38,9 +38,13 @@ struct Device {
   uint8_t zone = zoneFor(0);
   // Unix time of the last NTP sync. 0 means never.
   uint32_t syncedAt = 0;
+  // The name that other devices show. Empty gives "Papwick-XXXX".
+  char name[16] = "";
 };
 
 bool isValid(const Device& d);
+// True for 0 to 15 printable ASCII characters. The fonts have no other characters. Spaces at the ends are invalid.
+bool isValidName(const char* s);
 // month is 1 to 12.
 int daysInMonth(int month, int year);
 
