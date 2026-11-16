@@ -16,6 +16,7 @@ void tiles(int x, int y, uint16_t ink, uint16_t bg);
 void discs(int x, int y, uint16_t ink, uint16_t bg);
 void lights(int x, int y, uint16_t ink, uint16_t bg);
 void crate(int x, int y, uint16_t ink, uint16_t bg);
+void flag(int x, int y, uint16_t ink, uint16_t bg);
 void radio(int x, int y, uint16_t ink, uint16_t bg);
 void gear(int x, int y, uint16_t ink, uint16_t bg);
 

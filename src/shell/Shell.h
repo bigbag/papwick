@@ -28,6 +28,7 @@ class App {
   virtual void draw() = 0;
   // Runs each frame period when the screen is on and not dirty. Use it to push small sprites.
   virtual void animate() {}
+  virtual uint32_t frameMs() const { return 50; }
   // Runs in each loop, also for the open app and when the screen is off.
   virtual void background() {}
   virtual bool keepAwake() const { return false; }

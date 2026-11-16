@@ -61,7 +61,7 @@ Settings has a page for each group. Swipe left or right to change the page. Tap 
 - While the screen is off, the CPU runs at 80 MHz instead of 240 MHz. A lower clock stops the PLL, and then USB, Wi-Fi and I2S stop.
 - The speaker amplifier and the codec DAC are on only during a tone or a voice, and for 3 s after it. With the sound off, tones do not turn them on.
 - With the vibration off, the motor gets no power.
-- No app uses the IMU. The shell puts it into suspend mode at start-up.
+- The shell puts the IMU into suspend mode at start-up. Only Mini golf uses it. Mini golf turns on only the accelerometer, and only during a game and on its calibration screen.
 - The AMOLED uses power only for lit pixels. Use dark backgrounds.
 
 ## Wi-Fi
@@ -90,7 +90,7 @@ Security: the device has no flash encryption. A person with the device and a USB
 
 `src/main.cpp` lists the apps and starts the shell. All apps compile into one firmware image. `[papwick] version` in `platformio.ini` sets the firmware version. The log shows the version and the reset reason at start-up.
 
-The shell loop reads the input, controls the light and the red button, and gives the input to the current app. It draws the app when the app is dirty, and it calls `animate()` every 50 ms.
+The shell loop reads the input, controls the light and the red button, and gives the input to the current app. It draws the app when the app is dirty, and it calls `animate()` once in each frame period of the app.
 
 An app implements `App` in `src/shell/Shell.h`:
 
@@ -98,6 +98,7 @@ An app implements `App` in `src/shell/Shell.h`:
 - `boot()`: loads the saved data once at start-up
 - `start()`, `stop()`: open and leave the app. `stop()` saves the state
 - `update()`, `draw()`, `animate()`: input, full frame and small animation
+- `frameMs()`: the frame period. The default is 50 ms. Mini golf uses 25 ms while a level or the calibration is on the screen
 - `background()`: runs in each loop while another app is open, for example for a timer
 - `keepAwake()`: true keeps the screen on, for example during a workout
 - `settings()`, `settingsChanged()`: the setting rows for Settings > Apps
@@ -105,7 +106,7 @@ An app implements `App` in `src/shell/Shell.h`:
 
 Rules for apps:
 
-- Use the one full-screen sprite of `lib/Ui`. Do not make a second one.
+- Use the one full-screen sprite of `lib/Ui`. Do not make a second one. Mini golf keeps the picture of the level in a PSRAM buffer, and it frees the buffer in `stop()`.
 - Do not call `M5.Speaker.begin()` or `M5.Mic.begin()`. Use `board::micBegin()` and `board::micEnd()`.
 - Do not use the red button. The shell owns it.
 - Get each user interface text from `tr(KEY)` of `lib/I18n`. Do not write texts in the code.

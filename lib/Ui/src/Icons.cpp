@@ -77,6 +77,15 @@ void crate(int x, int y, uint16_t ink, uint16_t bg) {
   line(x - 22, y + 22, x + 22, y - 22, ink);
 }
 
+void flag(int x, int y, uint16_t ink, uint16_t bg) {
+  auto& c = ui::canvas();
+  c.fillEllipse(x, y + 28, 34, 8, ink);
+  c.fillEllipse(x + 4, y + 28, 9, 3, bg);
+  line(x + 4, y + 26, x + 4, y - 34, ink);
+  c.fillTriangle(x + 4, y - 36, x + 34, y - 24, x + 4, y - 12, ink);
+  c.fillCircle(x - 20, y + 14, 8, ink);
+}
+
 void radio(int x, int y, uint16_t ink, uint16_t bg) {
   auto& c = ui::canvas();
   line(x - 12, y - 36, x - 12, y - 24, ink);

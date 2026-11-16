@@ -115,6 +115,22 @@ Push all boxes onto the targets. A cat pushes the boxes. A box moves only when t
 
 To make new levels, run `python3 scripts/make_sokoban_levels.py 9 9 3`. The arguments are the width, the height and the number of boxes. The script prints the best levels with their push-optimal solutions. Add a level to `lib/SokobanCore/src/SokobanLevels.cpp` and its solution to `test/unit/SokobanTest.cpp`. A different number of levels also changes `kLevelCount` and `kLevelNames`.
 
+## Mini golf
+
+Tilt the device to roll the ball into the hole. The app has 27 levels in five themes: meadow, coast, evening, autumn and winter night. The levels have walls, hills, sand and water. Some levels have a bridge or a turning windmill bar.
+
+- The menu shows the level, its par time, the best time and the stars. Swipe left or right to select a level. A level opens when you finish the level before it.
+- Before the first game, the app opens the calibration. Put the device on a flat surface and push green. The app measures the tilt for 1 s and saves it as the level. To calibrate again, hold the menu screen. A dot on the calibration screen rolls to the low side.
+- Push green to open the level, and push green again to start. Hold the device flat to keep the ball still.
+- During a level, green starts the level again and blue goes back to the menu.
+- The time runs until the ball drops into the hole. Water puts the ball back on the tee and adds 5 s.
+- A time at par or faster gets 3 stars. A time up to 1.6 times par gets 2 stars. A slower time gets 1 star.
+- Sand slows the ball. A fast ball rolls over the hole.
+- The accelerometer is on only during a game and on the calibration screen. The screen stays on while a level or the calibration is on the screen. After 60 s without input, the app goes back to the menu. During a game, a tilt change of the device is input. A device on a table does not change its tilt, also while the ball rolls.
+- The app saves the best times and the open levels. The save has space for 40 levels. When a new version adds levels, the save stays. After the last level, the next new level is open.
+
+The levels are in `lib/MiniGolfCore/src/Courses.cpp`. The unit test checks that each level fits the round screen and that a bot finishes each level within par. The bot finds its way with a search on a grid. To see the bot times, run the test with `GOLF_BOT=1`. Par is 1.5 times the bot time plus 1 s, rounded up to 0.5 s. The app paints the picture of a level once, when the level opens. During a level it pushes only small sprites: the ball, the windmill and the time.
+
 ## Walkie-talkie
 
 Push-to-talk voice between two or more TriviaPODs in the same Wi-Fi network. Each device must have the app open.

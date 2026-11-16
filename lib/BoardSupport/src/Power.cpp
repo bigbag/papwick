@@ -111,4 +111,25 @@ void imuOff() {
   }
 }
 
+bool imuOn() {
+  // The BMI270 accepts writes 450 us after it leaves the advanced power save. PWR_CTRL 0x04 starts the accelerometer.
+  const bool ok = M5.In_I2C.writeRegister8(kImuAddr, kImuPwrConf, 0x00, kI2cHz);
+  delayMicroseconds(500);
+  if (ok && M5.In_I2C.writeRegister8(kImuAddr, kImuPwrCtrl, 0x04, kI2cHz)) return true;
+  LOG_ERR(TAG, "IMU start failed");
+  // The caller keeps the IMU as off, so put back the power save now.
+  imuOff();
+  return false;
+}
+
+bool tilt(float& x, float& y) {
+  float ax, ay, az;
+  if (!M5.Imu.getAccel(&ax, &ay, &az)) return false;
+  // The sensor x axis points to the bottom of the screen and its y axis points to the right.
+  // The sensor measures the reaction to gravity. An axis that points to the low side reads negative.
+  x = -ay;
+  y = -ax;
+  return true;
+}
+
 }  // namespace board

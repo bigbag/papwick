@@ -1,0 +1,11 @@
+{
+  "name": "MiniGolfCore",
+  "version": "1.0.0",
+  "description": "Mini golf holes, ball physics, score and background picture without hardware dependencies",
+  "frameworks": ["arduino", "espidf"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src"
+  }
+}

@@ -26,5 +26,11 @@ void updateChargeLed();
 void powerOff();
 // Puts the BMI270 into suspend mode. M5.begin() turns on its accelerometer and gyroscope.
 void imuOff();
+// Turns on only the accelerometer. Returns false when the sensor does not accept the command.
+// Call imuOff() when the app no longer reads the tilt.
+bool imuOn();
+// The tilt in g along the screen axes: x to the right, y down. A ball rolls in this direction.
+// Returns false when the read fails.
+bool tilt(float& x, float& y);
 
 }  // namespace board

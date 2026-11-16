@@ -10,7 +10,7 @@
 namespace {
 
 constexpr const char* TAG = "SHELL";
-constexpr uint32_t kFrameMs = 50, kIdleMs = 10;
+constexpr uint32_t kIdleMs = 10;
 constexpr uint32_t kResyncSec = 7 * 24 * 3600;
 constexpr int kSyncMinBattery = 20;
 
@@ -153,7 +153,7 @@ void loop() {
       current->draw();
     }
     ui::push();
-  } else if (ms - lastDrawMs >= kFrameMs) {
+  } else if (ms - lastDrawMs >= current->frameMs()) {
     lastDrawMs = ms;
     if (!powerMenu) current->animate();
   } else {

@@ -3,6 +3,7 @@
 #include "apps/fitness/App.h"
 #include "apps/game2048/Game.h"
 #include "apps/lightsout/App.h"
+#include "apps/minigolf/App.h"
 #include "apps/pomodoro/App.h"
 #include "apps/sokoban/App.h"
 #include "apps/talk/App.h"
@@ -10,8 +11,8 @@
 
 namespace {
 
-App* const kApps[] = {&fitnessApp(),  &pomodoroApp(),  &clockApp(),   &game2048App(),
-                      &connect4App(), &lightsOutApp(), &sokobanApp(), &talkApp()};
+App* const kApps[] = {&fitnessApp(),   &pomodoroApp(), &clockApp(),    &game2048App(), &connect4App(),
+                      &lightsOutApp(), &sokobanApp(),  &miniGolfApp(), &talkApp()};
 
 }  // namespace
 

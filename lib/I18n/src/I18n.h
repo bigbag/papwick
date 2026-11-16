@@ -128,6 +128,16 @@
   X(DEVICE_WINS, "Device wins") \
   X(DRAW, "Draw") \
   X(FMT_TOTALS, "you %u : %u device") \
+  X(MINI_GOLF, "Mini golf") \
+  X(FMT_LEVEL_PAR, "Level %d   par %s") \
+  X(FMT_PAR, "par %s") \
+  X(FMT_PAR_BEST, "par %s   best %s") \
+  X(FMT_STARS, "%d of %d stars") \
+  X(HOLD_TO_CALIBRATE, "Hold the screen to calibrate") \
+  X(CALIBRATION, "Calibration") \
+  X(PLACE_FLAT, "Put the device on a flat surface") \
+  X(CALIBRATE, "calibrate") \
+  X(NEW_BEST, "New best!") \
   /* Pomodoro */ \
   X(POMODORO, "Pomodoro") \
   X(FOCUS, "Focus") \
