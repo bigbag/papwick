@@ -80,11 +80,19 @@ A focus timer: 4 focus sessions of 25 minutes, with a 5-minute break after each 
 - The "Start mode" setting selects "Auto" (the next period starts at once) or "Manual" (green starts the next period).
 - The screen goes off as set in Settings. The timer continues while the app is open. When you leave the app, the timer resets.
 
-## Clock
+## Stopwatch
 
-A watch face with the time, the date and the battery level. Tap the screen or push green to change between the analog and the digital face.
+The app measures time to 1/100 s. Below one hour the time shows as mm:ss.cc. From one hour it shows as h:mm:ss.
 
-The face is black with white marks, so the AMOLED uses little power. The face changes once a minute. The screen goes off as set in Settings, and the clock has no always-on mode.
+- Green starts and stops the time. After a stop, green continues the time.
+- Tap the screen during the time to end a lap. The device vibrates. The app keeps 99 laps. After the 99th lap, a tap does nothing.
+- Above the time, the screen shows the number of the current lap.
+- The screen shows the last three laps. With two or more different laps, the shortest lap is green and the longest lap is red.
+- Hold the screen after a stop to reset the time and the laps.
+- Without laps, the edge ring fills once in each minute. Its color changes in each minute.
+- After a lap, the ring fills in the time of the last lap. The ring is green while the current lap is shorter than the last lap. When the current lap is longer, the ring turns red.
+- At 99:59:59 the time stops. Then green does nothing, and a hold resets the time.
+- While the app is open and the time runs, the screen stays on. The time also runs when you leave the app. A power off clears it.
 
 ## Four in a Row
 

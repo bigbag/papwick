@@ -48,8 +48,6 @@
   X(HARD, "Hard") \
   X(AUTO, "Auto") \
   X(MANUAL, "Manual") \
-  X(ANALOG, "Analog") \
-  X(DIGITAL, "Digital") \
   /* Shell */ \
   X(HOME, "Home") \
   X(SETTINGS, "Settings") \
@@ -191,9 +189,13 @@
   X(FMT_LEQ, "Leq %.1f dB(A)") \
   X(DBA, "dB(A)") \
   X(OVERLOAD, "overload") \
-  /* Clock */ \
-  X(CLOCK, "Clock") \
-  X(FACE, "Face") \
+  /* Stopwatch */ \
+  X(STOPWATCH, "Stopwatch") \
+  X(FMT_LAP, "Lap %d") \
+  X(FMT_LAP_TIME, "Lap %d   %s") \
+  X(TAP_FOR_LAP, "Tap the screen for a lap") \
+  X(NO_MORE_LAPS, "No more laps") \
+  /* The date on the home screen */ \
   X(MON, "Mon") X(TUE, "Tue") X(WED, "Wed") X(THU, "Thu") X(FRI, "Fri") X(SAT, "Sat") X(SUN, "Sun") \
   X(JAN, "Jan") X(FEB, "Feb") X(MAR, "Mar") X(APR, "Apr") X(MAY, "May") X(JUN, "Jun") \
   X(JUL, "Jul") X(AUG, "Aug") X(SEP, "Sep") X(OCT, "Oct") X(NOV, "Nov") X(DEC, "Dec")

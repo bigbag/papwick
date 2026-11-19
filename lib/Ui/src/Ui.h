@@ -40,6 +40,8 @@ constexpr uint16_t kDark = 0x2104;
 constexpr uint16_t kRed = 0xE8E4;
 constexpr int kMaxRows = 5;
 constexpr int kHintsY = 415;
+// The edge ring for progress and page dots.
+constexpr int kRingInner = 214, kRingOuter = 232;
 
 bool begin();
 M5Canvas& canvas();
@@ -53,6 +55,8 @@ void text(const char* s, int x, int y, const lgfx::IFont* font, uint16_t color =
 void button(const Rect& r, const char* label, uint16_t bg, uint16_t fg = TFT_WHITE);
 // Draws an arc band near the round edge. Angles in degrees: 0 is 3 o'clock, 270 is 12 o'clock.
 void edgeArc(float from, float to, uint16_t color);
+// The same arc on dst, for example on the display for a small update.
+void edgeArc(LovyanGFX& dst, float from, float to, uint16_t color);
 void progressRing(float fraction, uint16_t color);
 // Draws one dot for each page at the bottom of the edge ring. The current page is white.
 void pageDots(int page, int count);

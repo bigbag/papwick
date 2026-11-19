@@ -9,6 +9,11 @@
 namespace {
 
 constexpr int kIconR = 80;
+constexpr StrId kDays[] = {StrId::STR_SUN, StrId::STR_MON, StrId::STR_TUE, StrId::STR_WED,
+                           StrId::STR_THU, StrId::STR_FRI, StrId::STR_SAT};
+constexpr StrId kMonths[] = {StrId::STR_JAN, StrId::STR_FEB, StrId::STR_MAR, StrId::STR_APR,
+                             StrId::STR_MAY, StrId::STR_JUN, StrId::STR_JUL, StrId::STR_AUG,
+                             StrId::STR_SEP, StrId::STR_OCT, StrId::STR_NOV, StrId::STR_DEC};
 
 class Launcher : public App {
  public:
@@ -42,9 +47,12 @@ class Launcher : public App {
     shownMinute_ = now / 60;
     tm local;
     localtime_r(&now, &local);
-    char line[16];
+    char line[32];
     strftime(line, sizeof(line), "%H:%M", &local);
     ui::text(line, ui::cx(), 70, &fonts::DejaVu40);
+    snprintf(line, sizeof(line), "%s %d %s", i18n::get(kDays[local.tm_wday]), local.tm_mday,
+             i18n::get(kMonths[local.tm_mon]));
+    ui::text(line, ui::cx(), 110, &fonts::DejaVu18, ui::kGrey);
 
     const AppInfo& a = entry(selected_).info();
     ui::canvas().fillCircle(ui::cx(), kIconY, kIconR, a.color);

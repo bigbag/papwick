@@ -27,7 +27,7 @@ More rules:
 
 ```
           +-------------+
-       .-'    clock      '-.         y 30..70   title band
+       .-'    time       '-.         y 30..70   title band
      /                       \
     |   +-------------------+ |      inscribed square 68..397
     |   |      content      | |      touch targets 56 px or more
@@ -42,7 +42,7 @@ Near the bottom edge, a touch lands lower than the finger aims. Thus the hit are
 
 ## Home screen
 
-The home screen shows one app at a time, with the clock, the battery icon and page dots. The battery icon shows the level. A bolt shows USB power. The fill is amber at 20 % or less and red at 10 % or less. Swipe left or right to change the app. Tap the icon or push green to open it. Settings is the last entry.
+The home screen shows one app at a time, with the time, the date, the battery icon and page dots. The battery icon shows the level. A bolt shows USB power. The fill is amber at 20 % or less and red at 10 % or less. Swipe left or right to change the app. Tap the icon or push green to open it. Settings is the last entry.
 
 ## Settings
 
@@ -109,7 +109,7 @@ Rules for apps:
 - Use the one full-screen sprite of `lib/Ui`. Do not make a second one. Mini golf keeps the picture of the level in a PSRAM buffer, and it frees the buffer in `stop()`.
 - Do not call `M5.Speaker.begin()` or `M5.Mic.begin()`. Use `board::micBegin()` and `board::micEnd()`.
 - Do not use the red button. The shell owns it.
-- When the user leaves the app, stop its activity. Pomodoro resets its timer, also a paused timer. Keep the state of a game and of a paused workout.
+- When the user leaves the app, stop its activity. Pomodoro resets its timer, also a paused timer. Keep the state of a game and of a paused workout. The stopwatch is an exception: its time continues.
 - Get each user interface text from `tr(KEY)` of `lib/I18n`. Do not write texts in the code.
 - Call `tr()` at run time. Do not call it in a static initializer. Fill option lists in a function-local static.
 
@@ -135,6 +135,6 @@ The data is in NVS (`Preferences`):
 
 - `sys`: device settings
 - `wifi`: saved networks
-- `fit`, `g2048`, `pomodoro`, `clock`, `connect4`, `lights`, `sokoban`: app data, one namespace for each app id
+- `fit`, `g2048`, `pomodoro`, `connect4`, `lights`, `sokoban`: app data, one namespace for each app id
 
 Each saved struct has a version. The firmware ignores a struct of an unknown version and uses the defaults. Reset all clears all namespaces and restarts the device.

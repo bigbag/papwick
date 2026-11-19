@@ -11,7 +11,7 @@ using Draw = void (*)(int x, int y, uint16_t ink, uint16_t bg);
 
 void dumbbell(int x, int y, uint16_t ink, uint16_t bg);
 void hourglass(int x, int y, uint16_t ink, uint16_t bg);
-void clock(int x, int y, uint16_t ink, uint16_t bg);
+void stopwatch(int x, int y, uint16_t ink, uint16_t bg);
 void tiles(int x, int y, uint16_t ink, uint16_t bg);
 void discs(int x, int y, uint16_t ink, uint16_t bg);
 void lights(int x, int y, uint16_t ink, uint16_t bg);

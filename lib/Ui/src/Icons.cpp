@@ -39,12 +39,14 @@ void hourglass(int x, int y, uint16_t ink, uint16_t bg) {
   c.fillTriangle(x - 18, y + 26, x + 18, y + 26, x, y + 14, ink);
 }
 
-void clock(int x, int y, uint16_t ink, uint16_t bg) {
+void stopwatch(int x, int y, uint16_t ink, uint16_t bg) {
   auto& c = ui::canvas();
-  c.fillCircle(x, y, 38, ink);
-  c.fillCircle(x, y, 30, bg);
-  line(x, y, x, y - 22, ink);
-  line(x, y, x + 16, y, ink);
+  c.fillRoundRect(x - 10, y - 50, 20, 9, 3, ink);
+  c.fillRect(x - 4, y - 43, 8, 10, ink);
+  c.fillCircle(x, y + 4, 38, ink);
+  c.fillCircle(x, y + 4, 30, bg);
+  line(x, y + 4, x + 14, y - 14, ink);
+  c.fillCircle(x, y + 4, 5, ink);
 }
 
 void tiles(int x, int y, uint16_t ink, uint16_t) {

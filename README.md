@@ -1,6 +1,6 @@
 # Papwick
 
-Papwick is an app platform firmware for the [M5Stack TriviaPOD](https://docs.m5stack.com/en/core/TriviaPOD). It has a home screen, device settings, Wi-Fi time sync and ten apps: Workout, Pomodoro, Clock, 2048, Four in a Row, Lights Out, Sokoban, Mini golf, Walkie-talkie and Noise meter.
+Papwick is an app platform firmware for the [M5Stack TriviaPOD](https://docs.m5stack.com/en/core/TriviaPOD). It has a home screen, device settings, Wi-Fi time sync and ten apps: Workout, Pomodoro, Stopwatch, 2048, Four in a Row, Lights Out, Sokoban, Mini golf, Walkie-talkie and Noise meter.
 
 > **Warning:** Papwick replaces the stock Etermax trivia firmware. The stock firmware has no public download. Make a [backup](docs/flashing.md#back-up-the-stock-firmware) before the first write.
 
@@ -23,7 +23,7 @@ This project is **not affiliated with M5Stack or Etermax**. It is a personal pro
 
 ### Platform
 
-- Home screen with one app on each page, the clock and a battery icon
+- Home screen with one app on each page, the time, the date and a battery icon
 - Touch for the content, physical buttons for the flow: blue is back, green is confirm
 - Red button: a click goes home, a double click asks to power off
 - Wheel pickers for numbers, dates and times
@@ -42,7 +42,7 @@ This project is **not affiliated with M5Stack or Etermax**. It is a personal pro
 
 - **Workout:** a 28-day home workout plan with no equipment, animated exercises, a weight log and statistics
 - **Pomodoro:** a focus timer with 25-minute sessions and breaks
-- **Clock:** an analog or digital watch face with the date and the battery level
+- **Stopwatch:** a stopwatch with laps; it runs on in other apps
 - **2048:** the tile game with swipe control and two color themes
 - **Four in a Row:** play against the device on three levels
 - **Lights Out:** turn off all lights on a 5 x 5 grid

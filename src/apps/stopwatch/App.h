@@ -2,4 +2,4 @@
 
 #include "../../shell/Shell.h"
 
-App& clockApp();
+App& stopwatchApp();

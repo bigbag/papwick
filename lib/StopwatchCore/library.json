@@ -1,0 +1,11 @@
+{
+  "name": "StopwatchCore",
+  "version": "1.0.0",
+  "description": "Stopwatch rules: elapsed time, laps and the time text without hardware dependencies",
+  "frameworks": ["arduino", "espidf"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDir": "src",
+    "includeDir": "src"
+  }
+}

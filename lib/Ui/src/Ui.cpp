@@ -17,8 +17,6 @@ namespace ui {
 namespace {
 
 constexpr const char* TAG = "UI";
-constexpr int kRingInner = 214;
-constexpr int kRingOuter = 232;
 constexpr int kRowTop = 118, kRowPitch = 52;
 
 M5Canvas sprite(&M5.Display);
@@ -61,16 +59,18 @@ void button(const Rect& r, const char* label, uint16_t bg, uint16_t fg) {
   text(label, r.x + r.w / 2, r.y + r.h / 2, &fonts::DejaVu24, fg);
 }
 
-void edgeArc(float from, float to, uint16_t color) {
+void edgeArc(float from, float to, uint16_t color) { edgeArc(sprite, from, to, color); }
+
+void edgeArc(LovyanGFX& dst, float from, float to, uint16_t color) {
   if (to <= from) return;
   const float span = std::fmin(to - from, 360.0f);
   from = std::fmod(from, 360.0f);
   to = from + span;
   if (to > 360.0f) {
-    sprite.fillArc(cx(), cy(), kRingInner, kRingOuter, from, 360.0f, color);
-    sprite.fillArc(cx(), cy(), kRingInner, kRingOuter, 0.0f, to - 360.0f, color);
+    dst.fillArc(cx(), cy(), kRingInner, kRingOuter, from, 360.0f, color);
+    dst.fillArc(cx(), cy(), kRingInner, kRingOuter, 0.0f, to - 360.0f, color);
   } else {
-    sprite.fillArc(cx(), cy(), kRingInner, kRingOuter, from, to, color);
+    dst.fillArc(cx(), cy(), kRingInner, kRingOuter, from, to, color);
   }
 }
 
