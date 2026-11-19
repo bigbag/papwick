@@ -17,6 +17,10 @@ namespace {
 constexpr const char* TAG = "BOARD";
 
 char timeZone[48] = "UTC0";
+// The RX8130 flag register. VLF (bit 1) shows a supply drop that can stop the time. A write of 0 clears a flag.
+constexpr uint8_t kRtcAddr = 0x32, kRtcFlags = 0x1D, kRtcVlf = 0x02;
+constexpr uint32_t kRtcFreq = 400000;
+bool timeKnown = false;
 
 tm buildTime() {
   static const char months[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
@@ -63,6 +67,8 @@ void setTimeZone(const char* tz) {
 }
 
 time_t syncClock() {
+  const uint8_t flags = M5.In_I2C.readRegister8(kRtcAddr, kRtcFlags, kRtcFreq);
+  LOG_INF(TAG, "RTC flags 0x%02X, VLF %d", flags, (flags & kRtcVlf) != 0);
   const auto dt = M5.Rtc.getDateTime();
   if (dt.isValid()) {
     M5.Rtc.setSystemTimeFromRtc();
@@ -71,23 +77,33 @@ time_t syncClock() {
     tzset();
     LOG_INF(TAG, "RTC time %04d-%02d-%02d %02d:%02d:%02d UTC", dt.date.year, dt.date.month, dt.date.date, dt.time.hours,
             dt.time.minutes, dt.time.seconds);
+    timeKnown = !(flags & kRtcVlf);
     return time(nullptr);
   }
 
   // The build time is the local time of the build host. mktime() converts it with the time zone setting.
+  // The RTC stays invalid, so the next start also knows that the time is lost.
   tm t = buildTime();
   t.tm_isdst = 0;
-  setClock(mktime(&t));
+  const timeval tv = {mktime(&t), 0};
+  settimeofday(&tv, nullptr);
   LOG_WRN(TAG, "RTC had no valid time, set to build time %s %s", __DATE__, __TIME__);
   return time(nullptr);
 }
 
+bool clockValid() { return timeKnown; }
+
 void setClock(time_t t) {
   const timeval tv = {t, 0};
   settimeofday(&tv, nullptr);
+  timeKnown = true;
   tm utc;
   gmtime_r(&t, &utc);
-  if (!M5.Rtc.setDateTime(&utc)) LOG_ERR(TAG, "RTC write failed");
+  if (!M5.Rtc.setDateTime(&utc)) {
+    LOG_ERR(TAG, "RTC write failed");
+  } else if (!M5.In_I2C.writeRegister8(kRtcAddr, kRtcFlags, static_cast<uint8_t>(~kRtcVlf), kRtcFreq)) {
+    LOG_ERR(TAG, "RTC flag clear failed");
+  }
 }
 
 void startNtp() {

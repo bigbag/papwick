@@ -14,7 +14,6 @@ namespace {
 
 constexpr const char* TAG = "SHELL";
 constexpr uint32_t kIdleMs = 10;
-constexpr uint32_t kResyncSec = 7 * 24 * 3600;
 constexpr int kSyncMinBattery = 20;
 constexpr int kMaxApps = 16;
 // NVS limits a namespace, and thus an app id, to 15 characters.
@@ -61,12 +60,11 @@ void powerOff() {
   board::powerOff();
 }
 
+// The RTC has no battery, so a power off stops its time. Thus each start syncs the time.
 void autoSync() {
-  const uint32_t now = time(nullptr);
-  const bool stale = dev.syncedAt == 0 || now < dev.syncedAt || now - dev.syncedAt > kResyncSec;
   // Wi-Fi current peaks on a low battery can reset the device.
   const bool power = board::onUsb() || board::batteryLevel() >= kSyncMinBattery;
-  if (stale && power && net::networks().count > 0) net::startSync();
+  if (power && net::networks().count > 0) net::startSync();
 }
 
 }  // namespace

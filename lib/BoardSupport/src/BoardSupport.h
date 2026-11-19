@@ -18,12 +18,15 @@ void waitForSerial(unsigned long timeoutMs);
 // Sets the local time zone as a POSIX TZ string, for example "UTC-3" for UTC+3. Call it before syncClock().
 void setTimeZone(const char* tz);
 
-// Sets the system clock from the RTC. When the RTC holds no valid time, sets both from the build time.
+// Sets the system clock from the RTC. When the RTC holds no valid time, sets the system clock from the build time.
 // The RTC holds UTC. Returns the current Unix time.
 time_t syncClock();
 
 // Sets the system clock and the RTC.
 void setClock(time_t t);
+
+// False when the RTC lost the time, for example at a power off, and no setClock() followed.
+bool clockValid();
 
 // Starts an NTP request. The Wi-Fi must be connected.
 void startNtp();

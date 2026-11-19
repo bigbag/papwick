@@ -13,7 +13,8 @@ namespace {
 
 constexpr const char* TAG = "NET";
 constexpr uint32_t kConnectMs = 15000;
-constexpr uint32_t kNtpMs = 10000;
+// lwIP waits up to 5 s before the first request, and 15 s for each server. Thus both servers get one try.
+constexpr uint32_t kNtpMs = 40000;
 
 Preferences prefs;
 sys::NetworkList list;

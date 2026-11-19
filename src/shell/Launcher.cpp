@@ -27,7 +27,7 @@ class Launcher : public App {
   void start() override { moving_ = false; }
 
   void update(const ui::Input& in) override {
-    if (time(nullptr) / 60 != shownMinute_) dirty = true;
+    if (time(nullptr) / 60 != shownMinute_ || board::clockValid() != shownValid_) dirty = true;
     if (moving_) {
       updateMove(in);
       return;
@@ -50,6 +50,7 @@ class Launcher : public App {
     ui::clear();
     const time_t now = time(nullptr);
     shownMinute_ = now / 60;
+    shownValid_ = board::clockValid();
     tm local;
     localtime_r(&now, &local);
     char line[32];
@@ -57,6 +58,8 @@ class Launcher : public App {
     ui::text(line, ui::cx(), 70, &fonts::DejaVu40);
     if (moving_) {
       ui::text(tr(SWIPE_TO_MOVE), ui::cx(), 110, &fonts::DejaVu18, ui::kAmber);
+    } else if (!shownValid_) {
+      ui::text(tr(TIME_NOT_SYNCED), ui::cx(), 110, &fonts::DejaVu18, ui::kAmber);
     } else {
       snprintf(line, sizeof(line), "%s %d %s", i18n::get(kDays[local.tm_wday]), local.tm_mday,
                i18n::get(kMonths[local.tm_mon]));
@@ -139,7 +142,7 @@ class Launcher : public App {
   }
 
   int selected_ = 0;
-  bool moving_ = false;
+  bool moving_ = false, shownValid_ = false;
   time_t shownMinute_ = 0;
 };
 

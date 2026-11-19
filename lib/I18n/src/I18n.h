@@ -11,6 +11,7 @@
   X(NEXT, "next") \
   X(OPEN, "open") \
   X(SWIPE_TO_MOVE, "Swipe to move the app") \
+  X(TIME_NOT_SYNCED, "Time not synced") \
   X(TAP_FOR_SETTINGS, "Tap the icon for the app settings") \
   X(YES, "yes") \
   X(NO, "no") \

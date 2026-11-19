@@ -96,7 +96,7 @@ A full-screen push of a 466 x 466 16-bit sprite takes about 32 ms. A full-screen
 
 ## RTC
 
-The firmware keeps UTC in the RX8130CE. When the RTC has no valid date, `M5.Rtc.getDateTime()` gives -1 in all fields. Then `board::syncClock()` sets the RTC from the build time. The StopWatch backs the RTC with a 10 uF capacitor only, so an empty battery can erase the time.
+The firmware keeps UTC in the RX8130CE. When the RTC has no valid date, `M5.Rtc.getDateTime()` gives -1 in all fields. Then `board::syncClock()` sets the system clock from the build time. The RTC stays invalid until the next sync. The StopWatch backs the RTC with a 10 uF capacitor only, so an empty battery can erase the time. A power off stops the time, and the shell thus syncs the time at each start. `board::syncClock()` logs the flag register 0x1D. Bit 1 (VLF) shows a supply drop. `board::setClock()` clears VLF. A power off of some minutes set VLF on the device (verified), and the RTC then was about 2 minutes late.
 
 ## Serial log
 

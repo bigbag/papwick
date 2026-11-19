@@ -91,8 +91,9 @@ Security: the device has no flash encryption. A person with the device and a USB
 
 - The RTC holds UTC.
 - The time zone is a UTC offset, from UTC-12 to UTC+14, with the 30 and 45 minute offsets. The zone has no daylight saving time. Change the offset when the clocks change.
-- A time sync asks `pool.ntp.org` and `time.google.com` for 10 s, then writes the time to the RTC.
-- The sync runs on "Sync now", after "Add network", and at start-up. The start-up sync runs when the last sync is older than 7 days, and the device is on USB or the battery has 20 % or more.
+- A time sync asks `pool.ntp.org` and `time.google.com` for up to 40 s, then writes the time to the RTC. lwIP waits up to 5 s before the first request and 15 s for each server.
+- The sync runs on "Sync now", after "Add network", and at start-up. The start-up sync runs at each start, when the device is on USB or the battery has 20 % or more. The RTC has no battery, so a power off stops its time.
+- When the RTC lost the time, the home screen shows "Time not synced" instead of the date. A sync or "Set time" removes the text.
 
 ## Software
 
