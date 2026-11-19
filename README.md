@@ -1,6 +1,6 @@
 # Papwick
 
-Papwick is an app platform firmware for the [M5Stack TriviaPOD](https://docs.m5stack.com/en/core/TriviaPOD). It has a home screen, device settings, Wi-Fi time sync and nine apps: Workout, Pomodoro, Clock, 2048, Four in a Row, Lights Out, Sokoban, Mini golf and Walkie-talkie.
+Papwick is an app platform firmware for the [M5Stack TriviaPOD](https://docs.m5stack.com/en/core/TriviaPOD). It has a home screen, device settings, Wi-Fi time sync and ten apps: Workout, Pomodoro, Clock, 2048, Four in a Row, Lights Out, Sokoban, Mini golf, Walkie-talkie and Noise meter.
 
 > **Warning:** Papwick replaces the stock Etermax trivia firmware. The stock firmware has no public download. Make a [backup](docs/flashing.md#back-up-the-stock-firmware) before the first write.
 
@@ -41,7 +41,7 @@ This project is **not affiliated with M5Stack or Etermax**. It is a personal pro
 ### Apps
 
 - **Workout:** a 28-day home workout plan with no equipment, animated exercises, a weight log and statistics
-- **Pomodoro:** a focus timer with 25-minute sessions and breaks; the alarm also comes in other apps
+- **Pomodoro:** a focus timer with 25-minute sessions and breaks
 - **Clock:** an analog or digital watch face with the date and the battery level
 - **2048:** the tile game with swipe control and two color themes
 - **Four in a Row:** play against the device on three levels
@@ -49,6 +49,7 @@ This project is **not affiliated with M5Stack or Etermax**. It is a personal pro
 - **Sokoban:** push the boxes onto the targets in 12 levels
 - **Mini golf:** tilt the device to roll the ball into the hole in 27 levels with hills, sand, water and a windmill
 - **Walkie-talkie:** push-to-talk voice between TriviaPODs in the same Wi-Fi network
+- **Noise meter:** the sound level in dB(A) with the maximum and the average; the ring color shows how far the level is above the normal level
 
 ## Installing
 

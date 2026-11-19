@@ -26,8 +26,11 @@ void micEnd();
 constexpr int kVoiceRate = 16000;
 constexpr int kVoiceFrame = 320;
 constexpr int kVoiceChunk = 3 * kVoiceFrame;
+// M5Unified multiplies the samples by gain / 2. kUnityGain keeps the codec level. The board default 16 clips a voice
+// near the microphone.
+constexpr uint8_t kUnityGain = 2, kVoiceGain = 8;
 // Starts the microphone. Its task puts each frame in a queue of 8 frames. Then it records the next frame at once.
-bool voiceCaptureBegin();
+bool voiceCaptureBegin(uint8_t gain = kVoiceGain);
 // Reads one frame from the queue. Returns false when the queue is empty.
 bool voiceRead(int16_t* frame);
 void voiceCaptureEnd();

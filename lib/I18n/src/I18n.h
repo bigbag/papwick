@@ -26,6 +26,7 @@
   X(RETRY, "retry") \
   X(TALK, "talk") \
   X(STOP, "stop") \
+  X(RESET, "reset") \
   /* Options */ \
   X(ON, "On") \
   X(OFF, "Off") \
@@ -115,11 +116,12 @@
   X(FMT_MOVES, "%lu moves") \
   X(LIGHTS_OUT, "Lights Out") \
   X(SOKOBAN, "Sokoban") \
-  X(LEVEL, "Level") \
   X(FMT_LEVEL, "Level %d") \
   X(FMT_MOVES_PUSHES, "%lu moves  %lu pushes") \
   X(RESTART_LEVEL_Q, "Restart level?") \
   X(RESET_TIMER_Q, "Reset the timer?") \
+  X(HOLD_TO_RESTART, "Hold the screen to restart") \
+  X(HOLD_TO_RESET, "Hold the screen to reset") \
   X(CONNECT4, "Four in a Row") \
   X(DIFFICULTY, "Difficulty") \
   X(YOUR_TURN, "Your turn") \
@@ -179,6 +181,16 @@
   X(NOBODY_ONLINE, "No paired device online") \
   X(LIST_FULL, "The list is full") \
   X(MIC_ERROR, "Microphone error") \
+  /* Noise meter */ \
+  X(NOISE_METER, "Noise meter") \
+  X(NORMAL_LEVEL, "Normal level") \
+  X(FMT_MAX_AVG, "max %d   avg %d") \
+  X(CORRECTION, "Correction, dB") \
+  X(NOISE_HELP, "Tap: normal level   Hold: calibrate") \
+  X(FMT_DB, "%d dB") \
+  X(FMT_LEQ, "Leq %.1f dB(A)") \
+  X(DBA, "dB(A)") \
+  X(OVERLOAD, "overload") \
   /* Clock */ \
   X(CLOCK, "Clock") \
   X(FACE, "Face") \

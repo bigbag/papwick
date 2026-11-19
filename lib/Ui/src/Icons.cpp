@@ -94,6 +94,13 @@ void radio(int x, int y, uint16_t ink, uint16_t bg) {
   for (int i = 0; i < 3; ++i) c.fillRoundRect(x - 13, y + 8 + i * 9, 26, 4, 2, bg);
 }
 
+void meter(int x, int y, uint16_t ink, uint16_t) {
+  auto& c = ui::canvas();
+  for (int i = 0; i < 5; ++i) c.fillArc(x, y + 14, 30, 42, 182 + i * 35.2f, 214 + i * 35.2f, ink);
+  line(x, y + 14, x + 18, y - 10, ink);
+  c.fillCircle(x, y + 14, 7, ink);
+}
+
 void gear(int x, int y, uint16_t ink, uint16_t bg) {
   constexpr float kPi = 3.14159265f;
   auto& c = ui::canvas();

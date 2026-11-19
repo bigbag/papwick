@@ -135,5 +135,25 @@ int main() {
                         bad.pushes == unchanged.pushes && bad.undoCount == unchanged.undoCount &&
                         bad.undoNext == unchanged.undoNext,
                     "failed undo preserves the current game");
+  Game played;
+  start(played, 0);
+  for (const char* c = solutions[0]; c < solutions[0] + 10; ++c) move(played, direction(*c));
+  Game back;
+  runner.expectTrue(resume(back, 0, park(played)) && back.player == played.player && back.boxes == played.boxes &&
+                        back.moves == played.moves && back.pushes == played.pushes && back.undoCount == 0 &&
+                        valid(back),
+                    "a parked level resumes at its position without undo moves");
+  Game fresh;
+  start(fresh, 0);
+  runner.expectTrue(resume(back, 0, Parked{}) && back.player == fresh.player && back.moves == 0,
+                    "an empty parked level starts new");
+  Parked broken = park(played);
+  broken.player = 0;
+  runner.expectTrue(resume(back, 0, broken) && back.moves == 0, "a parked position on a wall starts new");
+  Game solved;
+  start(solved, 0);
+  for (const char* c = solutions[0]; *c; ++c) move(solved, direction(*c));
+  runner.expectTrue(isWon(solved) && park(solved).moves == 0, "a solved level parks as empty");
+  runner.expectFalse(resume(back, kLevelCount, Parked{}), "an unknown level does not resume");
   return runner.exitCode();
 }

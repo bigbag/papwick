@@ -99,7 +99,7 @@ An app implements `App` in `src/shell/Shell.h`:
 - `start()`, `stop()`: open and leave the app. `stop()` saves the state
 - `update()`, `draw()`, `animate()`: input, full frame and small animation
 - `frameMs()`: the frame period. The default is 50 ms. Mini golf uses 25 ms while a level or the calibration is on the screen
-- `background()`: runs in each loop while another app is open, for example for a timer
+- `background()`: runs in each loop for each app, also while the screen is off, for example for the Pomodoro timer
 - `keepAwake()`: true keeps the screen on, for example during a workout
 - `settings()`, `settingsChanged()`: the setting rows for Settings > Apps
 - `clearData()`: clears the app data
@@ -109,6 +109,7 @@ Rules for apps:
 - Use the one full-screen sprite of `lib/Ui`. Do not make a second one. Mini golf keeps the picture of the level in a PSRAM buffer, and it frees the buffer in `stop()`.
 - Do not call `M5.Speaker.begin()` or `M5.Mic.begin()`. Use `board::micBegin()` and `board::micEnd()`.
 - Do not use the red button. The shell owns it.
+- When the user leaves the app, stop its activity. Pomodoro resets its timer, also a paused timer. Keep the state of a game and of a paused workout.
 - Get each user interface text from `tr(KEY)` of `lib/I18n`. Do not write texts in the code.
 - Call `tr()` at run time. Do not call it in a static initializer. Fill option lists in a function-local static.
 

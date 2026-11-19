@@ -27,8 +27,6 @@ constexpr int kCueChannel = 2;
 constexpr uint8_t kCueVolume = 128;
 constexpr uint32_t kVoiceChunkMs = kVoiceChunk * 1000 / kVoiceRate;
 constexpr int kVoiceQueue = 8;
-// The board default 16 clips a voice near the microphone.
-constexpr uint8_t kVoiceGain = 8;
 
 struct Tone {
   uint16_t hz, ms, gapMs;
@@ -179,7 +177,7 @@ void micEnd() {
   micOn = false;
 }
 
-bool voiceCaptureBegin() {
+bool voiceCaptureBegin(uint8_t gain) {
   if (!voiceQueue) voiceQueue = xQueueCreate(kVoiceQueue, sizeof(captureBuf[0]));
   if (!voiceQueue) {
     LOG_ERR(TAG, "Voice queue failed");
@@ -190,7 +188,7 @@ bool voiceCaptureBegin() {
   // The gain and the callback must be set before the first record().
   auto cfg = M5.Mic.config();
   micGain = cfg.magnification;
-  cfg.magnification = kVoiceGain;
+  cfg.magnification = gain;
   M5.Mic.config(cfg);
   M5.Mic.setBufferReleaseCallback(nullptr, onCapture);
   if (!micBegin()) {

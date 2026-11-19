@@ -36,6 +36,13 @@ struct Game {
   uint8_t undoCount = 0;
   uint8_t undoNext = 0;
 };
+// A level that the player left: the position and the counts, without the undo moves.
+struct Parked {
+  uint8_t player = 0;
+  std::array<uint8_t, kMaxBoxes> boxes{};
+  uint32_t moves = 0;
+  uint32_t pushes = 0;
+};
 
 const Level* level(uint8_t index);
 char terrain(const Game& game, uint8_t cell);
@@ -45,4 +52,8 @@ bool valid(const Game& game);
 bool isWon(const Game& game);
 bool move(Game& game, Direction direction);
 bool undo(Game& game);
+// A solved game parks as empty.
+Parked park(const Game& game);
+// Starts the level at the parked position. An empty, a solved or a bad position starts a new game.
+bool resume(Game& out, uint8_t index, const Parked& parked);
 }  // namespace sokoban

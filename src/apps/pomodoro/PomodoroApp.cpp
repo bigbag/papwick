@@ -32,10 +32,12 @@ class PomodoroApp : public App {
     applyMode();
   }
 
-  // The timer runs on in the background, so the alarm also comes on the home screen or in another app.
+  // The timer also runs while the screen is off. stop() resets it.
   void background() override { tick(millis()); }
 
   void start() override { askReset_ = false; }
+
+  void stop() override { pomodoro::reset(timer_); }
 
   void update(const ui::Input& in) override {
     const uint32_t now = millis();
@@ -165,7 +167,7 @@ class PomodoroApp : public App {
       case pomodoro::RunState::Running:
         break;
     }
-    return "";
+    return tr(HOLD_TO_RESET);
   }
 
   const char* greenHint() const {

@@ -166,4 +166,21 @@ bool undo(Game& game) {
   --game.undoCount;
   return true;
 }
+Parked park(const Game& game) {
+  if (isWon(game)) return {};
+  return {game.player, game.boxes, game.moves, game.pushes};
+}
+
+bool resume(Game& out, uint8_t index, const Parked& parked) {
+  if (!start(out, index)) return false;
+  if (parked.moves == 0) return true;
+  Game game = out;
+  game.player = parked.player;
+  game.boxes = parked.boxes;
+  game.moves = parked.moves;
+  game.pushes = parked.pushes;
+  if (valid(game) && !isWon(game)) out = game;
+  return true;
+}
+
 }  // namespace sokoban

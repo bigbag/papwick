@@ -24,8 +24,6 @@ constexpr uint16_t kInnerEar = lgfx::color565(245, 160, 175);
 constexpr uint16_t kEye = lgfx::color565(30, 30, 36);
 constexpr uint16_t kNose = lgfx::color565(240, 130, 150);
 constexpr uint16_t kWhisker = lgfx::color565(140, 140, 150);
-constexpr const char* kLevelNames[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
-static_assert(sizeof(kLevelNames) / sizeof(*kLevelNames) == sokoban::kLevelCount, "one name for each level");
 
 // The worker is a cat face. The parts scale with the cell. Small cells get no inner ears and no whiskers.
 void drawCat(int x, int y, int cell) {
@@ -59,14 +57,21 @@ class SokobanApp : public App {
   void boot() override {
     if (!prefs_.begin(info().id, false)) LOG_ERR(TAG, "NVS open failed");
     if (!shell::load(prefs_, "game", game_) || !sokoban::valid(game_)) sokoban::start(game_, 0);
-    level_ = game_.level;
+    shell::load(prefs_, "parked", parked_);
   }
 
-  void start() override { askRestart_ = false; }
+  void start() override {
+    askRestart_ = false;
+    openMenu();
+  }
 
   void stop() override { shell::save(prefs_, "game", game_); }
 
   void update(const ui::Input& in) override {
+    if (menu_) {
+      updateMenu(in);
+      return;
+    }
     if (askRestart_) {
       if (in.green) startLevel(game_.level);
       if (in.green || in.blue) {
@@ -76,13 +81,13 @@ class SokobanApp : public App {
       return;
     }
     if (in.blue) {
-      shell::home();
+      openMenu();
       return;
     }
     const bool won = sokoban::isWon(game_);
     if (in.green) {
       if (won) {
-        startLevel((game_.level + 1) % sokoban::kLevelCount);
+        openLevel((game_.level + 1) % sokoban::kLevelCount);
       } else if (sokoban::undo(game_)) {
         dirty = true;
       }
@@ -104,40 +109,81 @@ class SokobanApp : public App {
       ui::confirmDraw(tr(RESTART_LEVEL_Q), tr(YES));
       return;
     }
+    // The menu shows the board that green opens.
+    const sokoban::Game shown = menu_ ? gameFor(pick_) : game_;
     ui::clear();
     char line[48];
-    snprintf(line, sizeof(line), tr(FMT_LEVEL), game_.level + 1);
+    snprintf(line, sizeof(line), tr(FMT_LEVEL), shown.level + 1);
     ui::text(line, ui::cx(), 50, &fonts::DejaVu18);
-    snprintf(line, sizeof(line), tr(FMT_MOVES_PUSHES), static_cast<unsigned long>(game_.moves),
-             static_cast<unsigned long>(game_.pushes));
+    snprintf(line, sizeof(line), tr(FMT_MOVES_PUSHES), static_cast<unsigned long>(shown.moves),
+             static_cast<unsigned long>(shown.pushes));
     ui::text(line, ui::cx(), 80, &fonts::DejaVu12, ui::kGrey);
-    drawBoard();
-    const bool won = sokoban::isWon(game_);
-    if (won) ui::banner(tr(SOLVED), kAreaY, ui::kAmber);
-    ui::hints(410, tr(BACK), won ? tr(NEXT_LEVEL) : tr(UNDO));
-  }
-
-  ui::Row* settings(int& count) override {
-    static ui::Row rows[] = {{tr(LEVEL), kLevelNames, sokoban::kLevelCount, &level_}};
-    level_ = game_.level;
-    count = 1;
-    return rows;
-  }
-
-  void settingsChanged() override {
-    if (level_ != game_.level) startLevel(level_);
-    shell::save(prefs_, "game", game_);
+    drawBoard(shown);
+    const bool won = sokoban::isWon(shown);
+    if (menu_) {
+      ui::hints(410, tr(BACK), shown.moves > 0 ? tr(RESUME) : tr(START));
+      ui::pageDots(pick_, sokoban::kLevelCount);
+    } else {
+      if (won) {
+        ui::banner(tr(SOLVED), kAreaY, ui::kAmber);
+      } else {
+        ui::text(tr(HOLD_TO_RESTART), ui::cx(), 388, &fonts::DejaVu12, ui::kGrey);
+      }
+      ui::hints(410, tr(BACK), won ? tr(NEXT_LEVEL) : tr(UNDO));
+    }
   }
 
   void clearData() override {
     App::clearData();
+    parked_ = {};
     startLevel(0);
   }
 
  private:
+  // After a solved level, the menu selects the next level.
+  void openMenu() {
+    menu_ = true;
+    pick_ = sokoban::isWon(game_) ? (game_.level + 1) % sokoban::kLevelCount : game_.level;
+    dirty = true;
+  }
+
+  // The game that opens for a level: the unsolved game, the parked position of another level or a new game.
+  sokoban::Game gameFor(uint8_t index) const {
+    if (index == game_.level && !sokoban::isWon(game_)) return game_;
+    sokoban::Game g;
+    sokoban::resume(g, index, index == game_.level ? sokoban::Parked{} : parked_[index]);
+    return g;
+  }
+
+  void openLevel(uint8_t index) {
+    const sokoban::Game next = gameFor(index);
+    if (index != game_.level) {
+      parked_[game_.level] = sokoban::park(game_);
+      shell::save(prefs_, "parked", parked_);
+    }
+    game_ = next;
+    LOG_INF(TAG, "Level %d, %lu moves", index + 1, static_cast<unsigned long>(game_.moves));
+    dirty = true;
+  }
+
+  void updateMenu(const ui::Input& in) {
+    if (in.blue) {
+      shell::home();
+    } else if (in.green) {
+      openLevel(pick_);
+      menu_ = false;
+      dirty = true;
+    } else if (in.swipeLeft || in.swipeRight) {
+      const int next = std::clamp(pick_ + (in.swipeLeft ? 1 : -1), 0, sokoban::kLevelCount - 1);
+      if (next != pick_) {
+        pick_ = next;
+        dirty = true;
+      }
+    }
+  }
+
   void startLevel(uint8_t index) {
     if (!sokoban::start(game_, index)) return;
-    level_ = index;
     LOG_INF(TAG, "Level %d", index + 1);
     dirty = true;
   }
@@ -153,23 +199,23 @@ class SokobanApp : public App {
     dirty = true;
   }
 
-  void drawBoard() {
-    const sokoban::Level& map = *sokoban::level(game_.level);
+  void drawBoard(const sokoban::Game& game) {
+    const sokoban::Level& map = *sokoban::level(game.level);
     const int cell = std::min({kAreaW / map.width, kAreaH / map.height, kMaxCell});
     const int x0 = ui::cx() - cell * map.width / 2, y0 = kAreaY - cell * map.height / 2;
     auto& c = ui::canvas();
     for (uint8_t i = 0; i < map.width * map.height; ++i) {
       const int x = x0 + i % map.width * cell, y = y0 + i / map.width * cell;
-      const char t = sokoban::terrain(game_, i);
+      const char t = sokoban::terrain(game, i);
       if (t == '#') {
         c.fillRect(x + 1, y + 1, cell - 2, cell - 2, kWall);
         continue;
       }
       c.fillRect(x, y, cell, cell, kFloor);
       if (t == '.') c.fillCircle(x + cell / 2, y + cell / 2, cell / 5, kGoal);
-      if (sokoban::hasBox(game_, i)) {
+      if (sokoban::hasBox(game, i)) {
         c.fillRoundRect(x + 3, y + 3, cell - 6, cell - 6, 4, t == '.' ? kBoxDone : kBox);
-      } else if (i == game_.player) {
+      } else if (i == game.player) {
         drawCat(x, y, cell);
       }
     }
@@ -177,8 +223,9 @@ class SokobanApp : public App {
 
   Preferences prefs_;
   sokoban::Game game_;
-  uint8_t level_ = 0;
-  bool askRestart_ = false;
+  std::array<sokoban::Parked, sokoban::kLevelCount> parked_{};
+  int pick_ = 0;
+  bool menu_ = true, askRestart_ = false;
 };
 
 }  // namespace

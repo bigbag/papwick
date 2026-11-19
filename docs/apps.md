@@ -76,9 +76,9 @@ A focus timer: 4 focus sessions of 25 minutes, with a 5-minute break after each 
 
 - Green starts, pauses or resumes a focus session, and skips a break.
 - Hold the screen to reset the timer. The app asks first.
-- At the end of a period, the device turns the screen on, vibrates and plays a tone. The timer also runs on the home screen and in other apps.
+- At the end of a period, the device turns the screen on, vibrates and plays a tone.
 - The "Start mode" setting selects "Auto" (the next period starts at once) or "Manual" (green starts the next period).
-- The screen goes off as set in Settings. The timer continues. The device does not keep the timer after a power off.
+- The screen goes off as set in Settings. The timer continues while the app is open. When you leave the app, the timer resets.
 
 ## Clock
 
@@ -107,13 +107,16 @@ Turn off all lights on the 5 x 5 grid. A tap changes the light and its four neig
 
 Push all boxes onto the targets. A cat pushes the boxes. A box moves only when the cat pushes it, and the cat cannot pull a box.
 
+- The app has 12 levels. They get harder, from 2 boxes to 5 boxes.
+- The app opens the menu. The menu shows the level and page dots at the bottom edge. Swipe left or right to select a level. Green opens it. After a solved level, the menu selects the next level.
+- Each unsolved level keeps its position and its counts when you open a different level. Only the open level keeps its undo moves.
 - Swipe to move the cat.
 - Green undoes the last move, up to 128 moves. After a solved level, green opens the next level.
 - Hold the screen to restart the level.
-- The app has 12 levels. They get harder, from 2 boxes to 5 boxes. The "Level" setting opens a level.
+- Blue goes back to the menu.
 - The app saves the game when the user leaves the app.
 
-To make new levels, run `python3 scripts/make_sokoban_levels.py 9 9 3`. The arguments are the width, the height and the number of boxes. The script prints the best levels with their push-optimal solutions. Add a level to `lib/SokobanCore/src/SokobanLevels.cpp` and its solution to `test/unit/SokobanTest.cpp`. A different number of levels also changes `kLevelCount` and `kLevelNames`.
+To make new levels, run `python3 scripts/make_sokoban_levels.py 9 9 3`. The arguments are the width, the height and the number of boxes. The script prints the best levels with their push-optimal solutions. Add a level to `lib/SokobanCore/src/SokobanLevels.cpp` and its solution to `test/unit/SokobanTest.cpp`. A different number of levels also changes `kLevelCount`.
 
 ## Mini golf
 
@@ -156,3 +159,23 @@ The devices use UDP port 47800. HELLO goes to the broadcast address. Each device
 Security: the app has no encryption. The pairing is a consent step, not a protection: a host in the network can copy the id of a paired device. Each host in the network can receive the sound. Some routers isolate the clients, for example in a guest network. Then the devices cannot find each other.
 
 To test with one device, run `python3 scripts/talk_peer.py --echo --save talk.wav` on a PC in the same network. The PC shows on the device as "Test PC". The PC asks to pair, so push green on the device. The PC sends each talk back and writes it to `talk.wav`. The PC firewall must let UDP port 47800 in.
+
+## Noise meter
+
+The app shows the sound level in dB(A). The ring around the edge shows the level from 30 dB to 110 dB.
+
+- The large number is the level with the fast time weighting of 125 ms. Below it are the maximum and the average since the start or the last reset. The average is the equivalent continuous level (Leq).
+- A white segment holds the peak for 1.2 s. Then it falls back to the level.
+- The ring color shows how far the level is above the normal level. Blue is 10 dB or more below it. Green is at the normal level. Yellow is 10 dB above it, and red is 20 dB above it. More than 20 dB above it, the ring pulses. The pulse gets faster as the level increases.
+- A white dot and a white number on the scale show the normal level. Tap the screen to select the next normal level: 30, 40, 55, 70 or 85 dB. Settings > Apps > Noise meter also has this setting. The app saves it.
+- Push green to reset the maximum and the average. Blue goes back.
+- Hold the screen to calibrate. Swipe the wheel to set a correction from -6 dB to +6 dB in steps of 0.5 dB. The app adds the correction to each level. Above the wheel, the app shows the average level (Leq) with the correction, to 0.1 dB. Green saves the correction. Blue keeps the last saved correction. The calibration starts the maximum and the average again. During the calibration, the screen stays on.
+- The microphone runs only while the app is open and the screen is on. The app continues to measure while the power question is open. The screen turns off after the sleep time. Then the measurement stops, and the maximum and the average stay. When the screen turns on, the app starts the microphone again. The level shows "--" until the first new sound frame.
+- When a sample is at full scale, "overload" shows in red for 1 s in the place of "dB(A)". Then the level is too low.
+- When the microphone gives no sound for 2 s, the app shows the microphone error. Green tries again.
+
+Reference values: WHO recommends less than 30 dB(A) in a bedroom at night and 35 dB(A) in a living room during the day.
+
+The A weighting follows IEC 61672 within 0.1 dB up to 2 kHz. Above 4 kHz it falls faster than the standard, because the sample rate is 16 kHz. The codec also cuts the sound below about 200 Hz. The microphone sensitivity is not known. `kFullScaleDb` in `lib/NoiseCore/src/Noise.h` sets the dB value of the full scale for all devices. The correction calibrates one device.
+
+To calibrate, put the device and a reference meter (class 1 or class 2 of IEC 61672) next to each other. A speaker at 1 m to 2 m plays steady pink noise. Open the calibration and wait 30 s. Set the correction until the Leq of the app is the same as the Leq of the reference meter. Do this again at a different level to check the result. An acoustic calibrator (IEC 60942) is more accurate, but its coupler must seal the microphone hole of the case. Use a level that gives no "overload", for example 94 dB. The microphone noise sets the lowest level that the app can show, approximately 30 dB.
