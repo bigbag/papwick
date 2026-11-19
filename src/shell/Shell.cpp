@@ -5,6 +5,9 @@
 #include <Logging.h>
 #include <Preferences.h>
 
+#include <cstring>
+#include <utility>
+
 #include "Net.h"
 
 namespace {
@@ -13,12 +16,17 @@ constexpr const char* TAG = "SHELL";
 constexpr uint32_t kIdleMs = 10;
 constexpr uint32_t kResyncSec = 7 * 24 * 3600;
 constexpr int kSyncMinBattery = 20;
+constexpr int kMaxApps = 16;
+// NVS limits a namespace, and thus an app id, to 15 characters.
+constexpr size_t kOrderSize = kMaxApps * 16;
 
 Preferences prefs;
 sys::Device dev;
 // The settings that NVS holds. A failed write returns dev to them.
 sys::Device savedDev;
-App* const* appList = nullptr;
+// The apps of src/main.cpp, and the same apps in the order of the user.
+App* const* builtIn = nullptr;
+App* appList[kMaxApps] = {};
 int appCount = 0;
 App* current = nullptr;
 // The power question has its own redraw flag, so a background app cannot redraw it in each loop.
@@ -72,8 +80,8 @@ void App::clearData() {
 namespace shell {
 
 void begin(App* const* apps, int count) {
-  appList = apps;
-  appCount = count;
+  builtIn = apps;
+  appCount = count < kMaxApps ? count : kMaxApps;
   board::begin();
   board::imuOff();
   // On battery no serial host can connect, so the wait only delays the first frame.
@@ -93,6 +101,8 @@ void begin(App* const* apps, int count) {
     LOG_INF(TAG, "No valid device settings in NVS");
   }
   savedDev = dev;
+  if (count > kMaxApps) LOG_ERR(TAG, "Only %d of %d apps fit", kMaxApps, count);
+  loadAppOrder();
   net::begin();
   for (int i = 0; i < appCount; ++i) appList[i]->boot();
   LOG_INF(TAG, "Device: sleep %u, units %u, volume %u, vibration %u, brightness %u, zone %d min", dev.sleep, dev.units,
@@ -175,6 +185,30 @@ void home() { open(launcherApp()); }
 App* const* apps(int& count) {
   count = appCount;
   return appList;
+}
+
+void swapApps(int a, int b) {
+  if (a < 0 || b < 0 || a >= appCount || b >= appCount) return;
+  std::swap(appList[a], appList[b]);
+}
+
+void saveAppOrder() {
+  char text[kOrderSize] = "";
+  for (int i = 0; i < appCount; ++i) {
+    if (i) strlcat(text, ",", sizeof(text));
+    strlcat(text, appList[i]->info().id, sizeof(text));
+  }
+  if (!prefs.putString("order", text)) LOG_ERR(TAG, "Save app order failed");
+}
+
+void loadAppOrder() {
+  char saved[kOrderSize] = "";
+  if (prefs.isKey("order")) prefs.getString("order", saved, sizeof(saved));
+  const char* ids[kMaxApps];
+  int order[kMaxApps];
+  for (int i = 0; i < appCount; ++i) ids[i] = builtIn[i]->info().id;
+  sys::appOrder(saved, ids, appCount, order);
+  for (int i = 0; i < appCount; ++i) appList[i] = builtIn[order[i]];
 }
 
 sys::Device& device() { return dev; }

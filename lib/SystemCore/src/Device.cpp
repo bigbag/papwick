@@ -1,5 +1,6 @@
 #include "Device.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -96,6 +97,25 @@ void removeNetwork(NetworkList& l, int i) {
   if (i < 0 || i >= l.count) return;
   memmove(&l.items[i], &l.items[i + 1], (l.count - i - 1) * sizeof(Network));
   l.items[--l.count] = {};
+}
+
+void appOrder(const char* saved, const char* const* ids, int count, int* order) {
+  int n = 0;
+  auto used = [&](int i) { return std::find(order, order + n, i) != order + n; };
+  for (const char* s = saved; *s;) {
+    const size_t len = strcspn(s, ",");
+    for (int i = 0; i < count; ++i) {
+      if (!used(i) && strlen(ids[i]) == len && strncmp(ids[i], s, len) == 0) {
+        order[n++] = i;
+        break;
+      }
+    }
+    s += len;
+    if (*s) ++s;
+  }
+  for (int i = 0; i < count; ++i) {
+    if (!used(i)) order[n++] = i;
+  }
 }
 
 }  // namespace sys

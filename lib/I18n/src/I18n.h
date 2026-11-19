@@ -10,6 +10,8 @@
   X(BACK, "back") \
   X(NEXT, "next") \
   X(OPEN, "open") \
+  X(SWIPE_TO_MOVE, "Swipe to move the app") \
+  X(TAP_FOR_SETTINGS, "Tap the icon for the app settings") \
   X(YES, "yes") \
   X(NO, "no") \
   X(CANCEL, "cancel") \
@@ -184,7 +186,8 @@
   X(NORMAL_LEVEL, "Normal level") \
   X(FMT_MAX_AVG, "max %d   avg %d") \
   X(CORRECTION, "Correction, dB") \
-  X(NOISE_HELP, "Tap: normal level   Hold: calibrate") \
+  X(NOISE_TAP, "Tap: normal level") \
+  X(NOISE_HOLD, "Hold: calibrate") \
   X(FMT_DB, "%d dB") \
   X(FMT_LEQ, "Leq %.1f dB(A)") \
   X(DBA, "dB(A)") \

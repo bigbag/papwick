@@ -71,11 +71,26 @@ void testNetworks(TestUtils::TestRunner& r) {
   r.expectTrue(!isValid(l), "entry without SSID is invalid");
 }
 
+void testAppOrder(TestUtils::TestRunner& r) {
+  const char* const ids[] = {"a", "bb", "c", "d"};
+  auto order = [&](const char* saved) {
+    int o[4];
+    appOrder(saved, ids, 4, o);
+    return std::to_string(o[0]) + std::to_string(o[1]) + std::to_string(o[2]) + std::to_string(o[3]);
+  };
+  r.expectEqual("0123", order(""), "no saved order keeps the order of ids");
+  r.expectEqual("3210", order("d,c,bb,a"), "a full saved order");
+  r.expectEqual("2013", order("c,a"), "the apps that the saved order does not list come next");
+  r.expectEqual("2013", order("zz,c,a,c"), "unknown and repeated ids have no effect");
+  r.expectEqual("0123", order("b,"), "an id matches only as a whole");
+}
+
 }  // namespace
 
 int main() {
   TestUtils::TestRunner runner("SystemCore");
   testDevice(runner);
   testNetworks(runner);
+  testAppOrder(runner);
   return runner.exitCode();
 }

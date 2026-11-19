@@ -7,7 +7,7 @@ Touch works on the content. The buttons move through the flow. Each button has o
 - Tap: select an item or change an option
 - Swipe left or right: change the page or the app
 - Swipe up or down: turn a wheel picker
-- Hold an app icon: open the app page in Settings
+- Hold an app icon on the home screen: move the app
 - Blue button (left): back, or no in a question
 - Green button (right): the main action of the screen, for example confirm, next or start, or yes in a question
 - Red click: go to the home screen. On the home screen, the click turns the screen off. When the screen is off, the click turns it on
@@ -43,6 +43,14 @@ Near the bottom edge, a touch lands lower than the finger aims. Thus the hit are
 ## Home screen
 
 The home screen shows one app at a time, with the time, the date, the battery icon and page dots. The battery icon shows the level. A bolt shows USB power. The fill is amber at 20 % or less and red at 10 % or less. Swipe left or right to change the app. Tap the icon or push green to open it. Settings is the last entry.
+
+To change the order of the apps, hold the icon of an app:
+
+- The icon gets smaller. Arrows at its sides show the directions in which the app can move.
+- Swipe left or right, or tap an arrow, to move the app one place. The page dots show the new place.
+- Green keeps the new order. Blue restores the old order.
+- Tap the icon to keep the order and open the app page in Settings.
+- Settings stays the last entry. Settings > Apps shows the apps in the same order.
 
 ## Settings
 
@@ -112,6 +120,7 @@ Rules for apps:
 - When the user leaves the app, stop its activity. Pomodoro resets its timer, also a paused timer. Keep the state of a game and of a paused workout. The stopwatch is an exception: its time continues.
 - Get each user interface text from `tr(KEY)` of `lib/I18n`. Do not write texts in the code.
 - Call `tr()` at run time. Do not call it in a static initializer. Fill option lists in a function-local static.
+- Write a gesture hint, for example "Hold the screen to reset", in DejaVu18 or larger. On this display, DejaVu12 is about 1.1 mm high. Wear OS asks for 12 sp, that is about 20 px.
 
 ## Texts
 
@@ -133,7 +142,7 @@ The script needs Pillow. A language with other characters needs such fonts for a
 
 The data is in NVS (`Preferences`):
 
-- `sys`: device settings
+- `sys`: device settings and the app order
 - `wifi`: saved networks
 - `fit`, `g2048`, `pomodoro`, `connect4`, `lights`, `sokoban`: app data, one namespace for each app id
 

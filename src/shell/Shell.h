@@ -54,7 +54,13 @@ void open(App& app);
 void home();
 // Opens Settings > Apps at the page of the app.
 void openAppPage(App& app);
+// The apps in the order of the home screen and of Settings > Apps.
 App* const* apps(int& count);
+// Changes the order only in RAM. saveAppOrder() keeps it.
+void swapApps(int a, int b);
+void saveAppOrder();
+// Restores the saved order. Without a saved order, the apps have the order of src/main.cpp.
+void loadAppOrder();
 sys::Device& device();
 // The name that other devices show: the user name, or "Papwick-XXXX".
 const char* deviceName();

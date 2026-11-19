@@ -23,7 +23,7 @@ This project is **not affiliated with M5Stack or Etermax**. It is a personal pro
 
 ### Platform
 
-- Home screen with one app on each page, the time, the date and a battery icon
+- Home screen with one app on each page, the time, the date and a battery icon. Hold an icon to move the app
 - Touch for the content, physical buttons for the flow: blue is back, green is confirm
 - Red button: a click goes home, a double click asks to power off
 - Wheel pickers for numbers, dates and times

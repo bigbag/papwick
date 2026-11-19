@@ -74,4 +74,8 @@ bool addNetwork(NetworkList& l, const char* ssid, const char* password);
 void promoteNetwork(NetworkList& l, int i);
 void removeNetwork(NetworkList& l, int i);
 
+// Writes the indexes of ids into order, in the saved order. saved is a list of ids with commas. The ids that saved does
+// not list come next, in their own order. Unknown and repeated ids in saved have no effect.
+void appOrder(const char* saved, const char* const* ids, int count, int* order);
+
 }  // namespace sys

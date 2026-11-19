@@ -165,7 +165,8 @@ class NoiseApp : public App {
     const float a = angle(norm) * kPi / 180;
     const float x = ui::cx() + std::cos(a) * (kRingInner - 4), y = ui::cy() + std::sin(a) * (kRingInner - 4);
     c.fillCircle(x, y, 4, TFT_WHITE);
-    ui::text(tr(NOISE_HELP), ui::cx(), 382, &fonts::DejaVu12, ui::kGrey);
+    ui::text(tr(NOISE_TAP), ui::cx(), 356, &fonts::DejaVu18, ui::kGrey);
+    ui::text(tr(NOISE_HOLD), ui::cx(), 380, &fonts::DejaVu18, ui::kGrey);
     ui::hints(ui::kHintsY, tr(BACK), failed_ ? tr(RETRY) : tr(RESET));
     if (!text_.getBuffer()) ui::text(tr(OUT_OF_MEMORY), ui::cx(), ui::cy(), &fonts::DejaVu24, ui::kRed);
     drawText(c);

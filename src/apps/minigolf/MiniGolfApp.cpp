@@ -556,7 +556,7 @@ class MiniGolfApp : public App {
     if (noMemory_) {
       ui::text(tr(OUT_OF_MEMORY), ui::cx(), 350, &fonts::DejaVu18, ui::kRed);
     } else {
-      ui::text(tr(HOLD_TO_CALIBRATE), ui::cx(), 350, &fonts::DejaVu12);
+      ui::text(tr(HOLD_TO_CALIBRATE), ui::cx(), 350, &fonts::DejaVu18);
     }
     ui::hints(ui::kHintsY, tr(BACK), calibrated_ ? tr(START) : tr(CALIBRATE));
     ui::pageDots(hole_, progress_.selectable());

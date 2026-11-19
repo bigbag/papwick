@@ -127,7 +127,7 @@ class SokobanApp : public App {
       if (won) {
         ui::banner(tr(SOLVED), kAreaY, ui::kAmber);
       } else {
-        ui::text(tr(HOLD_TO_RESTART), ui::cx(), 388, &fonts::DejaVu12, ui::kGrey);
+        ui::text(tr(HOLD_TO_RESTART), ui::cx(), 388, &fonts::DejaVu18, ui::kGrey);
       }
       ui::hints(410, tr(BACK), won ? tr(NEXT_LEVEL) : tr(UNDO));
     }

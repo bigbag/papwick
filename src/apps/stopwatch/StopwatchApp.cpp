@@ -103,9 +103,9 @@ class StopwatchApp : public App {
                i == good ? ui::kGreen : (i == bad ? ui::kRed : TFT_WHITE));
     }
     if (watch_.running) {
-      ui::text(full ? tr(NO_MORE_LAPS) : tr(TAP_FOR_LAP), ui::cx(), 388, &fonts::DejaVu12, ui::kGrey);
+      ui::text(full ? tr(NO_MORE_LAPS) : tr(TAP_FOR_LAP), ui::cx(), 388, &fonts::DejaVu18, ui::kGrey);
     } else if (started) {
-      ui::text(tr(HOLD_TO_RESET), ui::cx(), 388, &fonts::DejaVu12, ui::kGrey);
+      ui::text(tr(HOLD_TO_RESET), ui::cx(), 388, &fonts::DejaVu18, ui::kGrey);
     }
     const char* green = t >= stopwatch::kMaxMs ? nullptr : (started ? tr(RESUME) : tr(START));
     ui::hints(ui::kHintsY, tr(BACK), watch_.running ? tr(STOP) : green);
